@@ -1,3 +1,6 @@
 # Project exclude paths
 /target/
 /.idea/
+/test_run/assets/
+/test_run/saves/
+/test_run/logs/
