@@ -184,6 +184,8 @@ import org.lwjgl.opengl.GLContext;
 import org.lwjgl.opengl.OpenGLException;
 import org.lwjgl.opengl.PixelFormat;
 import org.lwjgl.util.glu.GLU;
+import wtf.jukclient.Juk;
+import wtf.jukclient.event.KeyEvent;
 
 public class Minecraft implements IThreadListener, IPlayerUsage
 {
@@ -515,6 +517,8 @@ public class Minecraft implements IThreadListener, IPlayerUsage
         }
 
         this.renderGlobal.makeEntityOutlineShader();
+
+        Juk.getInstance();
     }
 
     private void registerMetadataSerializers()
@@ -1737,8 +1741,7 @@ public class Minecraft implements IThreadListener, IPlayerUsage
                             this.setIngameFocus();
                         }
                     }
-                    else if (this.currentScreen != null)
-                    {
+                    else {
                         this.currentScreen.handleMouseInput();
                     }
                 }
@@ -1754,6 +1757,7 @@ public class Minecraft implements IThreadListener, IPlayerUsage
             while (Keyboard.next())
             {
                 int k = Keyboard.getEventKey() == 0 ? Keyboard.getEventCharacter() + 256 : Keyboard.getEventKey();
+                Juk.getInstance().eventManager.post(new KeyEvent(k));
                 KeyBinding.setKeyBindState(k, Keyboard.getEventKeyState());
 
                 if (Keyboard.getEventKeyState())

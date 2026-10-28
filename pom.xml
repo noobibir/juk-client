@@ -40,13 +40,47 @@
 
     <repositories>
         <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+        <repository>
             <id>marcloud-development-repository</id>
             <name>marCloud-Repository</name>
             <url>https://repo.marcloud.net/</url>
         </repository>
+        <repository>
+            <id>minecraft</id>
+            <url>https://libraries.minecraft.net/</url>
+        </repository>
+        <repository>
+            <id>litarvan</id>
+            <url>https://litarvan.github.io/maven</url>
+        </repository>
+        <repository>
+            <id>central</id>
+            <name>Maven Central</name>
+            <url>https://repo1.maven.org/maven2</url>
+        </repository>
+        <repository>
+            <id>enonic</id>
+            <name>enonic</name>
+            <url>https://repo.enonic.com/public/</url>
+        </repository>
     </repositories>
 
     <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.26</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.10.2</version>
+        </dependency>
+
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
@@ -215,11 +249,11 @@
             <version>20100824</version>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>com.mojang</groupId>-->
-<!--            <artifactId>realmsclient</artifactId>-->
-<!--            <version>1.7.59</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>com.github.ZeroMemes</groupId>
+            <artifactId>Alpine</artifactId>
+            <version>3.1.0</version>
+        </dependency>
 
         <dependency>
             <groupId>com.mojang</groupId>

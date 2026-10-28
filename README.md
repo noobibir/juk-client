@@ -1,7 +1,7 @@
-# MavenMCP 1.8.9
+# Juk Client 1.8.9
 
 ### About
-Juk client is a client based on maven mcp 1.8.9
+Juk client is a client based on maven mcp 1.8.9<br>
 I made this client for playing on no anticheat servers and botting agerapvp :)
 
 ### Building

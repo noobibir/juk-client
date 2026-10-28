@@ -48,6 +48,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
+import wtf.jukclient.Juk;
+import wtf.jukclient.event.PacketEvent;
 
 public class NetworkManager extends SimpleChannelInboundHandler<Packet>
 {
@@ -135,18 +137,23 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet>
         this.closeChannel(chatcomponenttranslation);
     }
 
-    protected void channelRead0(ChannelHandlerContext p_channelRead0_1_, Packet p_channelRead0_2_) throws Exception
-    {
+    protected void channelRead0(ChannelHandlerContext context, Packet packet) {
         if (this.channel.isOpen())
         {
             try
             {
-                p_channelRead0_2_.processPacket(this.packetListener);
+                PacketEvent event = new PacketEvent(packet);
+                event.flow = PacketEvent.EventFlow.INBOUND;
+                Juk.getInstance().eventManager.post(event);
+
+                if (event.isCancelled()) {
+                    return;
+                }
+
+                packet = event.packet;
+                packet.processPacket(this.packetListener);
             }
-            catch (ThreadQuickExitException var4)
-            {
-                ;
-            }
+            catch (ThreadQuickExitException ignored) {}
         }
     }
 

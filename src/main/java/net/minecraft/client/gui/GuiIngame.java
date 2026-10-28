@@ -43,6 +43,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StringUtils;
 import net.minecraft.world.border.WorldBorder;
 import net.optifine.CustomColors;
+import wtf.jukclient.Juk;
+import wtf.jukclient.event.Render2dEvent;
 
 public class GuiIngame extends Gui
 {
@@ -330,6 +332,8 @@ public class GuiIngame extends Gui
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.disableLighting();
         GlStateManager.enableAlpha();
+
+        Juk.getInstance().eventManager.post(new Render2dEvent(partialTicks));
     }
 
     protected void renderTooltip(ScaledResolution sr, float partialTicks)

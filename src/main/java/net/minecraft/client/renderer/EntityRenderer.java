@@ -96,6 +96,8 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GLContext;
 import org.lwjgl.util.glu.Project;
+import wtf.jukclient.Juk;
+import wtf.jukclient.event.Render3dEvent;
 
 public class EntityRenderer implements IResourceManagerReloadListener
 {
@@ -1463,6 +1465,7 @@ public class EntityRenderer implements IResourceManagerReloadListener
 
     private void renderWorldPass(int pass, float partialTicks, long finishTimeNano)
     {
+        Juk.getInstance().eventManager.post(new Render3dEvent(partialTicks));
         boolean flag = Config.isShaders();
 
         if (flag)

@@ -211,6 +211,8 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.MapData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import wtf.jukclient.Juk;
+import wtf.jukclient.event.PacketEvent;
 
 public class NetHandlerPlayClient implements INetHandlerPlayClient
 {
@@ -712,9 +714,16 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient
         }
     }
 
-    public void addToSendQueue(Packet p_147297_1_)
-    {
-        this.netManager.sendPacket(p_147297_1_);
+    public void addToSendQueue(Packet<?> packet) {
+        PacketEvent event = new PacketEvent(packet);
+        event.flow = PacketEvent.EventFlow.OUTBOUND;
+        Juk.getInstance().eventManager.post(event);
+
+        if (event.isCancelled())
+            return;
+        packet = event.packet;
+
+        this.netManager.sendPacket(packet);
     }
 
     public void handleCollectItem(S0DPacketCollectItem packetIn)
