@@ -1595,7 +1595,9 @@ public class Minecraft implements IThreadListener, IPlayerUsage
 
     public void runTick() throws IOException
     {
-        Juk.getInstance().eventManager.post(new TickEvent());
+        TickEvent event = new TickEvent();
+        Juk.getInstance().eventManager.post(event);
+        if (event.isCancelled()) return;
 
         if (this.rightClickDelayTimer > 0)
         {

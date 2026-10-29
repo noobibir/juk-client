@@ -442,6 +442,7 @@ public class PlayerControllerMP
     {
         AttackEvent event = new AttackEvent(targetEntity);
         Juk.getInstance().eventManager.post(event);
+        if (event.isCancelled()) return;
         targetEntity = event.target;
 
         this.syncCurrentPlayItem();
