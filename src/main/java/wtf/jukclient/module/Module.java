@@ -1,6 +1,7 @@
 package wtf.jukclient.module;
 
 import lombok.Getter;
+import lombok.Setter;
 import me.zero.alpine.listener.Subscriber;
 import net.minecraft.client.Minecraft;
 import wtf.jukclient.Juk;
@@ -18,6 +19,9 @@ public class Module implements Subscriber {
     private final EnumCategory category;
     @Getter
     private boolean enabled;
+    @Getter
+    @Setter
+    private int key;
     private final List<Setting> settings = new ArrayList<>();
 
     protected Module(String name, EnumCategory category) {
