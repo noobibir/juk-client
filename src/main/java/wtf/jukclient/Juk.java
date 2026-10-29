@@ -2,7 +2,7 @@ package wtf.jukclient;
 
 import me.zero.alpine.bus.EventBus;
 import me.zero.alpine.bus.EventManager;
-import wtf.jukclient.modules.ModuleManager;
+import wtf.jukclient.module.ModuleManager;
 
 public class Juk {
     private static Juk instance;

@@ -1,19 +1,17 @@
-package wtf.jukclient.modules;
+package wtf.jukclient.module;
 
+import lombok.Getter;
 import org.reflections.Reflections;
 
 import java.util.HashMap;
 import java.util.Set;
 
 public class ModuleManager {
+    @Getter
     private final HashMap<Class<? extends Module>, Module> modules = new HashMap<>();
 
     public ModuleManager() {
         register();
-    }
-
-    public HashMap<Class<? extends Module>, Module> getModules() {
-        return modules;
     }
 
     public final Module getModule(Class<? extends Module> mod) {
@@ -26,8 +24,8 @@ public class ModuleManager {
 
         for (Class<? extends Module> m : classes) {
             try {
-                final Module feat = m.newInstance();
-                modules.put(m, feat);
+                final Module inst = m.newInstance();
+                modules.put(m, inst);
             } catch (InstantiationException | IllegalAccessException e) {
                 System.out.println("exception occurred while instantiating module " + m.getSimpleName());
             }
