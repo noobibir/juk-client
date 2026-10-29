@@ -186,6 +186,7 @@ import org.lwjgl.opengl.PixelFormat;
 import org.lwjgl.util.glu.GLU;
 import wtf.jukclient.Juk;
 import wtf.jukclient.event.KeyEvent;
+import wtf.jukclient.event.TickEvent;
 
 public class Minecraft implements IThreadListener, IPlayerUsage
 {
@@ -1594,6 +1595,8 @@ public class Minecraft implements IThreadListener, IPlayerUsage
 
     public void runTick() throws IOException
     {
+        Juk.getInstance().eventManager.post(new TickEvent());
+
         if (this.rightClickDelayTimer > 0)
         {
             --this.rightClickDelayTimer;

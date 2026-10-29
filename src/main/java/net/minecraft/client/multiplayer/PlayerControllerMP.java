@@ -28,6 +28,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSettings;
+import wtf.jukclient.Juk;
+import wtf.jukclient.event.AttackEvent;
 
 public class PlayerControllerMP
 {
@@ -438,6 +440,10 @@ public class PlayerControllerMP
 
     public void attackEntity(EntityPlayer playerIn, Entity targetEntity)
     {
+        AttackEvent event = new AttackEvent(targetEntity);
+        Juk.getInstance().eventManager.post(event);
+        targetEntity = event.target;
+
         this.syncCurrentPlayItem();
         this.netClientHandler.addToSendQueue(new C02PacketUseEntity(targetEntity, C02PacketUseEntity.Action.ATTACK));
 
