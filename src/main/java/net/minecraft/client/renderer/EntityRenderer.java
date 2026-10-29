@@ -97,6 +97,7 @@ import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GLContext;
 import org.lwjgl.util.glu.Project;
 import wtf.jukclient.Juk;
+import wtf.jukclient.JukGlobals;
 import wtf.jukclient.event.Render3dEvent;
 
 public class EntityRenderer implements IResourceManagerReloadListener
@@ -607,6 +608,10 @@ public class EntityRenderer implements IResourceManagerReloadListener
 
     private void hurtCameraEffect(float partialTicks)
     {
+        if (JukGlobals.noHurtCam) {
+            return;
+        }
+
         if (this.mc.getRenderViewEntity() instanceof EntityLivingBase)
         {
             EntityLivingBase entitylivingbase = (EntityLivingBase)this.mc.getRenderViewEntity();
@@ -713,7 +718,7 @@ public class EntityRenderer implements IResourceManagerReloadListener
                     f5 = f5 * 0.1F;
                     MovingObjectPosition movingobjectposition = this.mc.theWorld.rayTraceBlocks(new Vec3(d0 + (double)f3, d1 + (double)f4, d2 + (double)f5), new Vec3(d0 - d4 + (double)f3 + (double)f5, d1 - d6 + (double)f4, d2 - d5 + (double)f5));
 
-                    if (movingobjectposition != null)
+                    if (movingobjectposition != null && !JukGlobals.cameraClip)
                     {
                         double d7 = movingobjectposition.hitVec.distanceTo(new Vec3(d0, d1, d2));
 
