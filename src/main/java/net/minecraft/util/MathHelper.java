@@ -288,16 +288,20 @@ public class MathHelper
         }
     }
 
-    public static int func_180183_b(float p_180183_0_, float p_180183_1_, float p_180183_2_)
+    public static int rgb2int(float r, float g, float b)
     {
-        return func_180181_b(floor_float(p_180183_0_ * 255.0F), floor_float(p_180183_1_ * 255.0F), floor_float(p_180183_2_ * 255.0F));
+        return rgb2int(
+                floor_float(r * 255.0F),
+                floor_float(g * 255.0F),
+                floor_float(b * 255.0F)
+        );
     }
 
-    public static int func_180181_b(int p_180181_0_, int p_180181_1_, int p_180181_2_)
+    public static int rgb2int(int r, int g, int b)
     {
-        int i = (p_180181_0_ << 8) + p_180181_1_;
-        i = (i << 8) + p_180181_2_;
-        return i;
+        int col = (r << 8) + g;
+        col = (col << 8) + b;
+        return col;
     }
 
     public static int func_180188_d(int p_180188_0_, int p_180188_1_)
