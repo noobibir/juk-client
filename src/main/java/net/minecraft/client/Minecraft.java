@@ -519,7 +519,7 @@ public class Minecraft implements IThreadListener, IPlayerUsage
 
         this.renderGlobal.makeEntityOutlineShader();
 
-        Juk.getInstance();
+        Juk.getInstance().init();
     }
 
     private void registerMetadataSerializers()

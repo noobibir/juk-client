@@ -51,6 +51,8 @@ import net.minecraft.util.MovementInput;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.World;
+import wtf.jukclient.Juk;
+import wtf.jukclient.event.ChatMessageEvent;
 
 public class EntityPlayerSP extends AbstractClientPlayer
 {
@@ -225,6 +227,10 @@ public class EntityPlayerSP extends AbstractClientPlayer
 
     public void sendChatMessage(String message)
     {
+        ChatMessageEvent event = new ChatMessageEvent(message);
+        Juk.getInstance().eventManager.post(event);
+        if (event.isCancelled()) return;
+        message = event.message;
         this.sendQueue.addToSendQueue(new C01PacketChatMessage(message));
     }
 
