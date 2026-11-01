@@ -22,6 +22,7 @@ public class Module implements Subscriber {
     @Getter
     @Setter
     private int key;
+    @Getter
     private final List<Setting> settings = new ArrayList<>();
 
     protected Module(String name, EnumCategory category) {

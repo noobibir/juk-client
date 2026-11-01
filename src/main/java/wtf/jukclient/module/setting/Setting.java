@@ -9,6 +9,7 @@ import java.util.function.BooleanSupplier;
 public abstract class Setting {
     protected final Minecraft mc = Minecraft.getMinecraft();
     private BooleanSupplier settingRenderFunc;
+    private Runnable settingChangedFunc;
     @Getter
     protected final String name;
 
@@ -26,7 +27,13 @@ public abstract class Setting {
         }
         return settingRenderFunc.getAsBoolean();
     }
+    public void onChanged() {
+        settingChangedFunc.run();
+    }
     public void addSettingRenderFunc (BooleanSupplier func) {
         settingRenderFunc = func;
+    }
+    public void addSettingChangedFunc (Runnable func) {
+        settingChangedFunc = func;
     }
 }

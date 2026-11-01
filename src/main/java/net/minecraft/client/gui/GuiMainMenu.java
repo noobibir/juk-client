@@ -39,7 +39,6 @@ import org.lwjgl.util.glu.Project;
 
 public class GuiMainMenu extends GuiScreen implements GuiYesNoCallback
 {
-    private static final AtomicInteger field_175373_f = new AtomicInteger(0);
     private static final Logger logger = LogManager.getLogger();
     private static final Random RANDOM = new Random();
     private float updateCounter;
@@ -47,7 +46,6 @@ public class GuiMainMenu extends GuiScreen implements GuiYesNoCallback
     private GuiButton buttonResetDemo;
     private int panoramaTimer;
     private DynamicTexture viewportTexture;
-    private boolean field_175375_v = true;
     private final Object threadLock = new Object();
     private String openGLWarning1;
     private String openGLWarning2;
@@ -570,7 +568,7 @@ public class GuiMainMenu extends GuiScreen implements GuiYesNoCallback
         GlStateManager.scale(f, f, f);
         this.drawCenteredString(this.fontRendererObj, this.splashText, 0, -8, -256);
         GlStateManager.popMatrix();
-        String s = "Minecraft 1.8.9";
+        String s = "Juk Client";
 
         if (this.mc.isDemo())
         {

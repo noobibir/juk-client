@@ -2,16 +2,11 @@ package wtf.jukclient.ui;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import org.lwjgl.opengl.GL11;
 import wtf.jukclient.Juk;
 import wtf.jukclient.JukGlobals;
 import wtf.jukclient.module.EnumCategory;
 import wtf.jukclient.module.Module;
-import wtf.jukclient.util.ChatUtil;
+import wtf.jukclient.util.RenderUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,7 +79,7 @@ public class ClickGuiFrame {
             dragPosX = mouseX - dragOffsetX;
             dragPosY = mouseY - dragOffsetY;
 
-            outline(
+            RenderUtil.outline(
                     dragPosX - sizeX / 2,
                     dragPosY,
                     dragPosX + sizeX / 2,
@@ -114,11 +109,11 @@ public class ClickGuiFrame {
         if (mouseX >= mListLeft && mouseX <= mListRight) {
             int mInd = (mouseY - posY) / fr.FONT_HEIGHT - 1;
             if (mInd >= 0 && mInd < modules.size()) {
-                if (mouseButton == 0) {
+                if (mouseButton == 0) { // left click
                     modules.get(mInd).toggle();
                 }
-                else if (mouseButton == 1) {
-                    ChatUtil.send("open settings");
+                else if (mouseButton == 1) { // right click
+                    owner.openSettings(modules.get(mInd));
                 }
             }
             return true;
@@ -133,38 +128,5 @@ public class ClickGuiFrame {
             posX = dragPosX;
             posY = dragPosY;
         }
-    }
-
-    private void outline(int left, int top, int right, int bottom, int color) {
-        if (left < right) {
-            int i = left;
-            left = right;
-            right = i;
-        }
-
-        if (top < bottom) {
-            int j = top;
-            top = bottom;
-            bottom = j;
-        }
-
-        float a = (float)(color >> 24 & 255) / 255.0F;
-        float r = (float)(color >> 16 & 255) / 255.0F;
-        float g = (float)(color >> 8 & 255) / 255.0F;
-        float b = (float)(color & 255) / 255.0F;
-        Tessellator tessellator = Tessellator.getInstance();
-        WorldRenderer worldrenderer = tessellator.getWorldRenderer();
-        GlStateManager.enableBlend();
-        GlStateManager.disableTexture2D();
-        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
-        GlStateManager.color(r, g, b, a);
-        worldrenderer.begin(GL11.GL_LINE_LOOP, DefaultVertexFormats.POSITION);
-        worldrenderer.pos(left, bottom, 0.0D).endVertex();
-        worldrenderer.pos(right, bottom, 0.0D).endVertex();
-        worldrenderer.pos(right, top, 0.0D).endVertex();
-        worldrenderer.pos(left, top, 0.0D).endVertex();
-        tessellator.draw();
-        GlStateManager.enableTexture2D();
-        GlStateManager.disableBlend();
     }
 }
