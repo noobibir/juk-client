@@ -1336,7 +1336,7 @@ public class Minecraft implements IThreadListener, IPlayerUsage
             {
                 this.inGameHasFocus = true;
                 this.mouseHelper.grabMouseCursor();
-                this.displayGuiScreen((GuiScreen)null);
+                this.displayGuiScreen(null);
                 this.leftClickCounter = 10000;
             }
         }
@@ -1346,7 +1346,9 @@ public class Minecraft implements IThreadListener, IPlayerUsage
     {
         if (this.inGameHasFocus)
         {
-            KeyBinding.unPressAllKeys();
+            if (!JukGlobals.guiMove) {
+                KeyBinding.unPressAllKeys();
+            }
             this.inGameHasFocus = false;
             this.mouseHelper.ungrabMouseCursor();
         }
@@ -1800,18 +1802,6 @@ public class Minecraft implements IThreadListener, IPlayerUsage
                     if (this.currentScreen != null)
                     {
                         this.currentScreen.handleKeyboardInput();
-
-                        if (JukGlobals.guiMove) {
-                            int keyCode = Keyboard.getEventKey();
-                            if (keyCode == this.gameSettings.keyBindForward.getKeyCode() ||
-                                    keyCode == this.gameSettings.keyBindLeft.getKeyCode() ||
-                                    keyCode == this.gameSettings.keyBindBack.getKeyCode() ||
-                                    keyCode == this.gameSettings.keyBindRight.getKeyCode() ||
-                                    keyCode == this.gameSettings.keyBindJump.getKeyCode()) {
-                                boolean pressed = Keyboard.getEventKeyState();
-                                KeyBinding.setKeyBindState(keyCode, pressed);
-                            }
-                        }
                     }
                     else
                     {

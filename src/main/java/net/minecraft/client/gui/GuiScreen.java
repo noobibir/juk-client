@@ -23,6 +23,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.EntityList;
 import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
@@ -43,6 +44,7 @@ import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import tv.twitch.chat.ChatUserInfo;
+import wtf.jukclient.JukGlobals;
 
 public abstract class GuiScreen extends Gui implements GuiYesNoCallback
 {
@@ -548,6 +550,18 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback
 
     public void handleKeyboardInput() throws IOException
     {
+        if (JukGlobals.guiMove) {
+            int keyCode = Keyboard.getEventKey();
+            if (keyCode == mc.gameSettings.keyBindForward.getKeyCode() ||
+                    keyCode == mc.gameSettings.keyBindLeft.getKeyCode() ||
+                    keyCode == mc.gameSettings.keyBindBack.getKeyCode() ||
+                    keyCode == mc.gameSettings.keyBindRight.getKeyCode() ||
+                    keyCode == mc.gameSettings.keyBindJump.getKeyCode()) {
+                boolean pressed = Keyboard.getEventKeyState();
+                KeyBinding.setKeyBindState(keyCode, pressed);
+            }
+        }
+
         if (Keyboard.getEventKeyState())
         {
             this.keyTyped(Keyboard.getEventCharacter(), Keyboard.getEventKey());
