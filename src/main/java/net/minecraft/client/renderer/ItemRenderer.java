@@ -31,6 +31,7 @@ import net.optifine.DynamicLights;
 import net.optifine.reflect.Reflector;
 import net.optifine.shaders.Shaders;
 import org.lwjgl.opengl.GL11;
+import wtf.jukclient.JukGlobals;
 
 public class ItemRenderer
 {
@@ -331,31 +332,35 @@ public class ItemRenderer
                 {
                     EnumAction enumaction = this.itemToRender.getItemUseAction();
 
+                    float swing = JukGlobals.oneSevenBlock ? f1 : 0;
+
                     switch (enumaction)
                     {
                         case NONE:
-                            this.transformFirstPersonItem(f, 0.0F);
+                            this.transformFirstPersonItem(f, swing);
                             break;
 
                         case EAT:
                         case DRINK:
                             this.performDrinking(abstractclientplayer, partialTicks);
-                            this.transformFirstPersonItem(f, 0.0F);
+                            this.transformFirstPersonItem(f, swing);
                             break;
 
                         case BLOCK:
-                            this.transformFirstPersonItem(f, 0.0F);
+                            this.transformFirstPersonItem(f, swing);
                             this.doBlockTransformations();
                             break;
 
                         case BOW:
-                            this.transformFirstPersonItem(f, 0.0F);
+                            this.transformFirstPersonItem(f, swing);
                             this.doBowTransformations(partialTicks, abstractclientplayer);
                     }
                 }
                 else
                 {
-                    this.doItemUsedTransformations(f1);
+                    if (!JukGlobals.oddSwing) {
+                        this.doItemUsedTransformations(f1);
+                    }
                     this.transformFirstPersonItem(f, f1);
                 }
 
