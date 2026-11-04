@@ -84,7 +84,7 @@ public class ClickGuiFrame {
                     dragPosY,
                     dragPosX + sizeX / 2,
                     dragPosY + fr.FONT_HEIGHT,
-                    0xFFFFFFFF
+                    JukGlobals.clickguiframe_categoryDragOutlineColor
             );
         }
     }

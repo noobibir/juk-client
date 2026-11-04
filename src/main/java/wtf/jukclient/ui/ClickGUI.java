@@ -2,6 +2,7 @@ package wtf.jukclient.ui;
 
 import net.minecraft.client.gui.GuiScreen;
 import org.lwjgl.input.Keyboard;
+import wtf.jukclient.JukGlobals;
 import wtf.jukclient.module.EnumCategory;
 import wtf.jukclient.module.Module;
 import wtf.jukclient.module.setting.Setting;
@@ -57,38 +58,39 @@ public class ClickGUI extends GuiScreen {
                 settingWindowY = mouseY - dragOffsetY;
             }
 
-            drawRect(0, 0, this.width, this.height, 0x88000000); //background tint
-            drawRect(
+            drawRect(0, 0, this.width, this.height, JukGlobals.clickgui_settingsWindowTint); //background tint
+            drawRect( //more tint on window
                     settingWindowX, settingWindowY,
                     settingWindowX + settingWindowSizeX,
                     settingWindowY + settingWindowSizeY,
-                    0xAA000000
-            ); //more tint on window
+                    JukGlobals.clickgui_settingsWindowBackgroundTint
+            );
             RenderUtil.outline( // window borders
                     settingWindowX,
                     settingWindowY,
                     settingWindowX + settingWindowSizeX,
                     settingWindowY + settingWindowSizeY,
-                    0xFFAAAAAA
+                    JukGlobals.clickgui_settingsWindowBorder
             );
             String bind = isAwaitingBind ? "..." : Keyboard.getKeyName(ms.getKey());
             String title = ms.getName() + " - bind: " + bind // window title
                     + " - " + (ms.isEnabled() ? "enabled" : "disabled");
-            fontRendererObj.drawString(title, settingWindowX + 1, settingWindowY + 1, 0xFFFFFFFF);
+            fontRendererObj.drawString(title, settingWindowX + 1, settingWindowY + 1, JukGlobals.clickgui_settingsWindowTitle);
             // close button
             int cright = settingWindowX + settingWindowSizeX - 1;
             int cleft = cright - 20;
             int ctop = settingWindowY + 1;
             int cbottom = ctop + 10;
             boolean hovered = mouseX >= cleft && mouseX <= cright && mouseY >= ctop && mouseY <= cbottom;
-            int buttonColor = hovered ? 0xFFBBBBBB : 0xFFFFFFFF;
+            int buttonColor = hovered ? JukGlobals.clickgui_settingsWindowClose_hover : JukGlobals.clickgui_settingsWindowClose;
             if (hovered) {
-                drawRect(cleft, ctop, cright, cbottom, 0xFFFF3333);
+                drawRect(cleft, ctop, cright, cbottom, JukGlobals.clickgui_settingsWindowCloseBackground);
             }
             RenderUtil.line(cleft + 7, ctop + 2, cright - 7, cbottom - 2, buttonColor);
             RenderUtil.line(cleft + 7, cbottom - 2, cright - 7, ctop + 2, buttonColor);
             // line between window title and settings
-            drawHorizontalLine(settingWindowX, settingWindowX + settingWindowSizeX - 1, settingWindowY + fontRendererObj.FONT_HEIGHT + 2, 0xFFFFFFFF);
+            drawHorizontalLine(settingWindowX, settingWindowX + settingWindowSizeX - 1,
+                    settingWindowY + fontRendererObj.FONT_HEIGHT + 2, JukGlobals.clickgui_settingsWindowBorder);
             int sy = settingWindowY + fontRendererObj.FONT_HEIGHT + 4;
             for (Setting s : ms.getSettings()) {
                 if (s.isRendered()) {
