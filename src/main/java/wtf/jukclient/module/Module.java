@@ -29,21 +29,6 @@ public class Module implements Subscriber {
         this.name = name;
         this.category = category;
         mc = Minecraft.getMinecraft();
-
-        // auto register all settings
-        Arrays.stream(getClass().getFields()).forEach((field) -> {
-            if (!field.getType().isInstance(Setting.class)) return;
-
-            if (!field.isAccessible()) {
-                field.setAccessible(true);
-            }
-
-            try {
-                settings.add((Setting) field.get(this));
-            } catch (IllegalAccessException e) {
-                System.out.println("[module] failed to register setting " + field.getName());
-            }
-        });
     }
 
     public void onEnable() {
@@ -54,6 +39,11 @@ public class Module implements Subscriber {
     public void onDisable() {
         enabled = false;
         Juk.getInstance().eventManager.unsubscribe(this);
+    }
+
+    protected <T extends Setting> T addSetting (T setting) {
+        this.settings.add(setting);
+        return setting;
     }
 
     public void toggle() {
