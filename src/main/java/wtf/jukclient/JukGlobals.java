@@ -24,4 +24,11 @@ public class JukGlobals {
     public static int clickgui_settingsWindowClose_hover = 0xFFBBBBBB;
     public static int clickgui_settingsWindowClose = 0xFFFFFFFF;
     public static int clickgui_settingsWindowCloseBackground = 0xFFFF3333;
+
+    public static int slider_width = 150;
+    public static int slider_outlineColor = 0xFFFFFFFF;
+    public static int slider_fillColor = 0xFF3366FF;
+    public static int slider_nameColor = 0xFFFFFFFF;
+    public static int slider_valueColor = 0xFFFFFFFF;
+    public static int slider_valueColor_hover = 0xFFAAAAAA;
 }
