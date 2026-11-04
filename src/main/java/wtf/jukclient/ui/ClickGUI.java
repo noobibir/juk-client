@@ -156,7 +156,7 @@ public class ClickGUI extends GuiScreen {
                     boolean changed = s.mouseClicked(mouseX, mouseY, settingWindowX + 3, sy);
                     sy += s.getSettingHeight();
 
-                    if (changed) {
+                    if (changed && ms.isEnabled()) {
                         s.onChanged();
                     }
                 }
@@ -175,6 +175,17 @@ public class ClickGUI extends GuiScreen {
     protected void mouseReleased(int mouseX, int mouseY, int state) {
         if (this.ms != null) {
             draggingSettings = false;
+            int sy = settingWindowY + fontRendererObj.FONT_HEIGHT + 4;
+            for (Setting s : ms.getSettings()) {
+                if (s.isRendered()) {
+                    boolean changed = s.mouseReleased(mouseX, mouseY, settingWindowX + 3, sy);
+                    sy += s.getSettingHeight();
+
+                    if (changed && ms.isEnabled()) {
+                        s.onChanged();
+                    }
+                }
+            }
             return;
         }
 
