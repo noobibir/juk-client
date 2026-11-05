@@ -117,7 +117,7 @@ public class ClickGUI extends GuiScreen {
         if (this.ms != null) {
             int sy = settingWindowY + fontRendererObj.FONT_HEIGHT + 4;
 
-            if (mouseY <= sy && mouseY >= settingWindowY) {
+            if (mouseY < sy && mouseY >= settingWindowY) {
                 //binding
                 String t1 = ms.getName() + " - bind:";
                 String bind = Keyboard.getKeyName(ms.getKey());

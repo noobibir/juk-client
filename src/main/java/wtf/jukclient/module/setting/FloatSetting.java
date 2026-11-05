@@ -41,7 +41,7 @@ public class FloatSetting extends Setting {
         GlStateManager.pushMatrix();
         GlStateManager.translate(x + JukGlobals.slider_width / 2.0f, y + mc.fontRendererObj.FONT_HEIGHT / 2.0f, 0);
         GlStateManager.scale(1f, 0.7f, 1);
-        boolean hovered = (mouseX >= x && mouseX <= x + JukGlobals.slider_width && mouseY >= y && mouseY <= y + mc.fontRendererObj.FONT_HEIGHT);
+        boolean hovered = (mouseX >= x && mouseX <= x + JukGlobals.slider_width && mouseY > y && mouseY < y + mc.fontRendererObj.FONT_HEIGHT);
         int valCol = (hovered || held) ? JukGlobals.slider_valueColor_hover : JukGlobals.slider_valueColor;
         screen.drawCenteredString(mc.fontRendererObj, value + "", 0, -mc.fontRendererObj.FONT_HEIGHT / 2, valCol);
         GlStateManager.popMatrix();
@@ -66,7 +66,7 @@ public class FloatSetting extends Setting {
     public boolean mouseClicked(int mouseX, int mouseY, int x, int y) {
         mouseX -= x + mc.fontRendererObj.getStringWidth(name) + 5;
         mouseY -= y;
-        if (mouseX < 0 || mouseY < 0 || mouseX > JukGlobals.slider_width || mouseY > mc.fontRendererObj.FONT_HEIGHT) {
+        if (mouseX < 0 || mouseY <= 0 || mouseX > JukGlobals.slider_width || mouseY >= mc.fontRendererObj.FONT_HEIGHT) {
             return false;
         }
 
