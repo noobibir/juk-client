@@ -53,6 +53,7 @@ import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.World;
 import wtf.jukclient.Juk;
 import wtf.jukclient.event.ChatMessageEvent;
+import wtf.jukclient.event.SlowdownEvent;
 
 public class EntityPlayerSP extends AbstractClientPlayer
 {
@@ -661,10 +662,22 @@ public class EntityPlayerSP extends AbstractClientPlayer
         boolean flag2 = this.movementInput.moveForward >= f;
         this.movementInput.updatePlayerMoveState();
 
-        if (this.isUsingItem() && !this.isRiding())
-        {
-            this.movementInput.moveStrafe *= 0.2F;
-            this.movementInput.moveForward *= 0.2F;
+        if (this.isUsingItem() && !this.isRiding()) {
+            float moveStrafeFactor = 0.2f;
+            float moveForwardFactor = 0.2f;
+            SlowdownEvent event = new SlowdownEvent(moveStrafeFactor, moveForwardFactor, this.getItemInUse());
+            Juk.getInstance().eventManager.post(event);
+
+            if (event.isCancelled()) {
+                moveForwardFactor = 1;
+                moveStrafeFactor = 1;
+            } else {
+                moveForwardFactor = event.moveForwardFactor;
+                moveStrafeFactor = event.moveStrafeFactor;
+            }
+
+            this.movementInput.moveStrafe *= moveForwardFactor;
+            this.movementInput.moveForward *= moveStrafeFactor;
             this.sprintToggleTimer = 0;
         }
 
