@@ -13,8 +13,6 @@ import java.io.IOException;
 public class ClickGUI extends GuiScreen {
     private final ClickGuiFrame[] frames;
     private Module ms = null;
-    private final int settingWindowSizeX = 16 * 30;
-    private final int settingWindowSizeY = 9 * 30;
     private int settingWindowX;
     private int settingWindowY;
     private boolean isAwaitingBind = false;
@@ -36,8 +34,8 @@ public class ClickGUI extends GuiScreen {
 
     @Override
     public void initGui() {
-        settingWindowX = this.width / 2 - settingWindowSizeX / 2;
-        settingWindowY = this.height / 2 - settingWindowSizeY / 2;
+        settingWindowX = this.width / 2 - JukGlobals.clickgui_settingsWindowSizeX / 2;
+        settingWindowY = this.height / 2 - JukGlobals.clickgui_settingsWindowSizeY / 2;
         isAwaitingBind = false;
         ms = null;
     }
@@ -61,15 +59,15 @@ public class ClickGUI extends GuiScreen {
             drawRect(0, 0, this.width, this.height, JukGlobals.clickgui_settingsWindowTint); //background tint
             drawRect( //more tint on window
                     settingWindowX, settingWindowY,
-                    settingWindowX + settingWindowSizeX,
-                    settingWindowY + settingWindowSizeY,
+                    settingWindowX + JukGlobals.clickgui_settingsWindowSizeX,
+                    settingWindowY + JukGlobals.clickgui_settingsWindowSizeY,
                     JukGlobals.clickgui_settingsWindowBackgroundTint
             );
             RenderUtil.outline( // window borders
                     settingWindowX,
                     settingWindowY,
-                    settingWindowX + settingWindowSizeX,
-                    settingWindowY + settingWindowSizeY,
+                    settingWindowX + JukGlobals.clickgui_settingsWindowSizeX,
+                    settingWindowY + JukGlobals.clickgui_settingsWindowSizeY,
                     JukGlobals.clickgui_settingsWindowBorder
             );
             String bind = isAwaitingBind ? "..." : Keyboard.getKeyName(ms.getKey());
@@ -77,7 +75,7 @@ public class ClickGUI extends GuiScreen {
                     + " - " + (ms.isEnabled() ? "enabled" : "disabled");
             fontRendererObj.drawString(title, settingWindowX + 1, settingWindowY + 1, JukGlobals.clickgui_settingsWindowTitle);
             // close button
-            int cright = settingWindowX + settingWindowSizeX - 1;
+            int cright = settingWindowX + JukGlobals.clickgui_settingsWindowSizeX - 1;
             int cleft = cright - 20;
             int ctop = settingWindowY + 1;
             int cbottom = ctop + 10;
@@ -89,7 +87,7 @@ public class ClickGUI extends GuiScreen {
             RenderUtil.line(cleft + 7, ctop + 2, cright - 7, cbottom - 2, buttonColor);
             RenderUtil.line(cleft + 7, cbottom - 2, cright - 7, ctop + 2, buttonColor);
             // line between window title and settings
-            drawHorizontalLine(settingWindowX, settingWindowX + settingWindowSizeX - 1,
+            drawHorizontalLine(settingWindowX, settingWindowX + JukGlobals.clickgui_settingsWindowSizeX - 1,
                     settingWindowY + fontRendererObj.FONT_HEIGHT + 2, JukGlobals.clickgui_settingsWindowBorder);
             int sy = settingWindowY + fontRendererObj.FONT_HEIGHT + 4;
             for (Setting s : ms.getSettings()) {
@@ -132,7 +130,7 @@ public class ClickGUI extends GuiScreen {
                 int t3size = fontRendererObj.getStringWidth(t3);
                 int t4size = fontRendererObj.getStringWidth(t4);
                 // close button
-                int cright = settingWindowX + settingWindowSizeX - 1;
+                int cright = settingWindowX + JukGlobals.clickgui_settingsWindowSizeX - 1;
                 int cleft = cright - 20;
                 if (mouseX >= settingWindowX + t1size && mouseX <= settingWindowX + t2size) {
                     isAwaitingBind = true;
