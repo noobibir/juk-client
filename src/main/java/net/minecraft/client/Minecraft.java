@@ -1765,7 +1765,9 @@ public class Minecraft implements IThreadListener, IPlayerUsage
             while (Keyboard.next())
             {
                 int k = Keyboard.getEventKey() == 0 ? Keyboard.getEventCharacter() + 256 : Keyboard.getEventKey();
-                Juk.getInstance().eventManager.post(new KeyEvent(k));
+                if (Keyboard.getEventKeyState()) {
+                    Juk.getInstance().eventManager.post(new KeyEvent(k));
+                }
                 KeyBinding.setKeyBindState(k, Keyboard.getEventKeyState());
 
                 if (Keyboard.getEventKeyState())
