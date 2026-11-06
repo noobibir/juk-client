@@ -28,7 +28,9 @@ public abstract class Setting {
         return settingRenderFunc.getAsBoolean();
     }
     public void onChanged() {
-        settingChangedFunc.run();
+        if (settingChangedFunc != null) {
+            settingChangedFunc.run();
+        }
     }
     public void addSettingRenderFunc (BooleanSupplier func) {
         settingRenderFunc = func;
