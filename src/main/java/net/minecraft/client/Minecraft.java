@@ -1984,7 +1984,7 @@ public class Minecraft implements IThreadListener, IPlayerUsage
                 this.displayGuiScreen(new GuiChat("/"));
             }
 
-            if (this.thePlayer.isUsingItem())
+            if (this.thePlayer.isUsingItem() && !JukGlobals.doNotStopUsingItem)
             {
                 if (!this.gameSettings.keyBindUseItem.isKeyDown())
                 {

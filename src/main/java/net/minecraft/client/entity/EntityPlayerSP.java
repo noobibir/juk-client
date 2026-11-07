@@ -52,9 +52,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.World;
 import wtf.jukclient.Juk;
-import wtf.jukclient.event.ChatMessageEvent;
-import wtf.jukclient.event.PlayerRotEvent;
-import wtf.jukclient.event.SlowdownEvent;
+import wtf.jukclient.event.*;
 
 public class EntityPlayerSP extends AbstractClientPlayer
 {
@@ -113,6 +111,10 @@ public class EntityPlayerSP extends AbstractClientPlayer
 
     public void onUpdate()
     {
+        PlayerTickEvent event = new PlayerTickEvent();
+        Juk.getInstance().eventManager.post(event);
+        if (event.isCancelled()) return;
+
         if (this.worldObj.isBlockLoaded(new BlockPos(this.posX, 0.0D, this.posZ)))
         {
             super.onUpdate();

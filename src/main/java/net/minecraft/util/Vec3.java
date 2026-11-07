@@ -44,6 +44,11 @@ public class Vec3
         return d0 < 1.0E-4D ? new Vec3(0.0D, 0.0D, 0.0D) : new Vec3(this.xCoord / d0, this.yCoord / d0, this.zCoord / d0);
     }
 
+    public Vec3 scale(float f)
+    {
+        return new Vec3(this.xCoord * f, this.yCoord * f, this.zCoord * f);
+    }
+
     public double dotProduct(Vec3 vec)
     {
         return this.xCoord * vec.xCoord + this.yCoord * vec.yCoord + this.zCoord * vec.zCoord;

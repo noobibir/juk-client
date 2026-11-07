@@ -6,6 +6,7 @@ public class JukGlobals {
     public static boolean cameraClip = false;
     public static boolean oddSwing = false;
     public static boolean oneSevenBlock = false;
+    public static boolean doNotStopUsingItem = false;
 
     public static final int clickguiframe_categoryBackgroundColor = 0xFF202020;
     public static final int clickguiframe_categoryBackgroundColor_hover = 0xFF404040;
