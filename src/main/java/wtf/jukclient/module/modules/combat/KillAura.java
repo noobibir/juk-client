@@ -80,6 +80,7 @@ public class KillAura extends Module {
 
     @Subscribe
     private void onTick(PlayerTickEvent event) {
+        if (event.isCancelled()) return;
         clicker.tick(minCPS.get(), maxCPS.get());
         updateTargets();
         updateTargetRotation();
