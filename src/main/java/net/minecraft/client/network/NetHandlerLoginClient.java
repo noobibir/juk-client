@@ -5,7 +5,6 @@ import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.exceptions.AuthenticationUnavailableException;
 import com.mojang.authlib.exceptions.InvalidCredentialsException;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
-import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import java.math.BigInteger;
 import java.security.PublicKey;
@@ -83,13 +82,7 @@ public class NetHandlerLoginClient implements INetHandlerLoginClient
             }
         }
 
-        this.networkManager.sendPacket(new C01PacketEncryptionResponse(secretkey, publickey, packetIn.getVerifyToken()), new GenericFutureListener < Future <? super Void >> ()
-        {
-            public void operationComplete(Future <? super Void > p_operationComplete_1_) throws Exception
-            {
-                NetHandlerLoginClient.this.networkManager.enableEncryption(secretkey);
-            }
-        }, new GenericFutureListener[0]);
+        this.networkManager.sendPacket(new C01PacketEncryptionResponse(secretkey, publickey, packetIn.getVerifyToken()), p_operationComplete_1_ -> NetHandlerLoginClient.this.networkManager.enableEncryption(secretkey), new GenericFutureListener[0]);
     }
 
     private MinecraftSessionService getSessionService()

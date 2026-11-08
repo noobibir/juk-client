@@ -42,12 +42,12 @@ import net.optifine.reflect.Reflector;
 
 public class WorldClient extends World
 {
-    private NetHandlerPlayClient sendQueue;
+    private final NetHandlerPlayClient sendQueue;
     private ChunkProviderClient clientChunkProvider;
     private final Set<Entity> entityList = Sets.<Entity>newHashSet();
     private final Set<Entity> entitySpawnQueue = Sets.<Entity>newHashSet();
     private final Minecraft mc = Minecraft.getMinecraft();
-    private final Set<ChunkCoordIntPair> previousActiveChunkSet = Sets.<ChunkCoordIntPair>newHashSet();
+    private final Set<ChunkCoordIntPair> previousActiveChunkSet = Sets.newHashSet();
     private boolean playerUpdate = false;
 
     public WorldClient(NetHandlerPlayClient netHandler, WorldSettings settings, int dimension, EnumDifficulty difficulty, Profiler profilerIn)
@@ -61,7 +61,7 @@ public class WorldClient extends World
         this.mapStorage = new SaveDataMemoryStorage();
         this.calculateInitialSkylight();
         this.calculateInitialWeather();
-        Reflector.postForgeBusEvent(Reflector.WorldEvent_Load_Constructor, new Object[] {this});
+        Reflector.postForgeBusEvent(Reflector.WorldEvent_Load_Constructor, this);
 
         if (this.mc.playerController != null && this.mc.playerController.getClass() == PlayerControllerMP.class)
         {

@@ -61,8 +61,8 @@ public abstract class World implements IBlockAccess
     protected final List<Entity> unloadedEntityList = Lists.<Entity>newArrayList();
     public final List<TileEntity> loadedTileEntityList = Lists.<TileEntity>newArrayList();
     public final List<TileEntity> tickableTileEntities = Lists.<TileEntity>newArrayList();
-    private final List<TileEntity> addedTileEntityList = Lists.<TileEntity>newArrayList();
-    private final List<TileEntity> tileEntitiesToBeRemoved = Lists.<TileEntity>newArrayList();
+    protected final List<TileEntity> addedTileEntityList = Lists.<TileEntity>newArrayList();
+    protected final List<TileEntity> tileEntitiesToBeRemoved = Lists.newArrayList();
     public final List<EntityPlayer> playerEntities = Lists.<EntityPlayer>newArrayList();
     public final List<Entity> weatherEffects = Lists.<Entity>newArrayList();
     protected final IntHashMap<Entity> entitiesById = new IntHashMap();
@@ -89,12 +89,12 @@ public abstract class World implements IBlockAccess
     protected Scoreboard worldScoreboard = new Scoreboard();
     public final boolean isRemote;
     protected Set<ChunkCoordIntPair> activeChunkSet = Sets.<ChunkCoordIntPair>newHashSet();
-    private int ambientTickCountdown;
+    protected int ambientTickCountdown;
     protected boolean spawnHostileMobs;
     protected boolean spawnPeacefulMobs;
-    private boolean processingLoadedTiles;
-    private final WorldBorder worldBorder;
-    int[] lightUpdateBlockList;
+    protected boolean processingLoadedTiles;
+    protected final WorldBorder worldBorder;
+    protected int[] lightUpdateBlockList;
 
     protected World(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client)
     {
@@ -174,7 +174,7 @@ public abstract class World implements IBlockAccess
         return this.getBlockState(blockpos).getBlock();
     }
 
-    private boolean isValid(BlockPos pos)
+    protected boolean isValid(BlockPos pos)
     {
         return pos.getX() >= -30000000 && pos.getZ() >= -30000000 && pos.getX() < 30000000 && pos.getZ() < 30000000 && pos.getY() >= 0 && pos.getY() < 256;
     }
@@ -224,7 +224,7 @@ public abstract class World implements IBlockAccess
         return this.isAreaLoaded(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, allowEmpty);
     }
 
-    private boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty)
+    protected boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty)
     {
         if (yEnd >= 0 && yStart < 256)
         {
@@ -1495,7 +1495,7 @@ public abstract class World implements IBlockAccess
 
         for (int k = 0; k < this.unloadedEntityList.size(); ++k)
         {
-            Entity entity1 = (Entity)this.unloadedEntityList.get(k);
+            Entity entity1 = this.unloadedEntityList.get(k);
             int j = entity1.chunkCoordX;
             int l1 = entity1.chunkCoordZ;
 
@@ -1507,7 +1507,7 @@ public abstract class World implements IBlockAccess
 
         for (int l = 0; l < this.unloadedEntityList.size(); ++l)
         {
-            this.onEntityRemoved((Entity)this.unloadedEntityList.get(l));
+            this.onEntityRemoved(this.unloadedEntityList.get(l));
         }
 
         this.unloadedEntityList.clear();
@@ -1515,7 +1515,7 @@ public abstract class World implements IBlockAccess
 
         for (int i1 = 0; i1 < this.loadedEntityList.size(); ++i1)
         {
-            Entity entity2 = (Entity)this.loadedEntityList.get(i1);
+            Entity entity2 = this.loadedEntityList.get(i1);
 
             if (entity2.ridingEntity != null)
             {
@@ -1571,7 +1571,7 @@ public abstract class World implements IBlockAccess
 
         while (iterator.hasNext())
         {
-            TileEntity tileentity = (TileEntity)iterator.next();
+            TileEntity tileentity = iterator.next();
 
             if (!tileentity.isInvalid() && tileentity.hasWorldObj())
             {
@@ -1620,7 +1620,7 @@ public abstract class World implements IBlockAccess
         {
             for (int j1 = 0; j1 < this.addedTileEntityList.size(); ++j1)
             {
-                TileEntity tileentity1 = (TileEntity)this.addedTileEntityList.get(j1);
+                TileEntity tileentity1 = this.addedTileEntityList.get(j1);
 
                 if (!tileentity1.isInvalid())
                 {
@@ -2392,7 +2392,7 @@ public abstract class World implements IBlockAccess
         if (!this.playerEntities.isEmpty())
         {
             int k1 = this.rand.nextInt(this.playerEntities.size());
-            EntityPlayer entityplayer1 = (EntityPlayer)this.playerEntities.get(k1);
+            EntityPlayer entityplayer1 = this.playerEntities.get(k1);
             int l1 = MathHelper.floor_double(entityplayer1.posX) + this.rand.nextInt(11) - 5;
             int i2 = MathHelper.floor_double(entityplayer1.posY) + this.rand.nextInt(11) - 5;
             int j2 = MathHelper.floor_double(entityplayer1.posZ) + this.rand.nextInt(11) - 5;
@@ -2541,7 +2541,7 @@ public abstract class World implements IBlockAccess
         return flag;
     }
 
-    private int getRawLight(BlockPos pos, EnumSkyBlock lightType)
+    protected int getRawLight(BlockPos pos, EnumSkyBlock lightType)
     {
         if (lightType == EnumSkyBlock.SKY && this.canSeeSky(pos))
         {
@@ -2774,7 +2774,7 @@ public abstract class World implements IBlockAccess
 
     public <T extends Entity> List<T> getEntities(Class <? extends T > entityType, Predicate <? super T > filter)
     {
-        List<T> list = Lists.<T>newArrayList();
+        List<T> list = Lists.newArrayList();
 
         for (Entity entity : this.loadedEntityList)
         {
@@ -2789,7 +2789,7 @@ public abstract class World implements IBlockAccess
 
     public <T extends Entity> List<T> getPlayers(Class <? extends T > playerType, Predicate <? super T > filter)
     {
-        List<T> list = Lists.<T>newArrayList();
+        List<T> list = Lists.newArrayList();
 
         for (Entity entity : this.playerEntities)
         {
@@ -2813,7 +2813,7 @@ public abstract class World implements IBlockAccess
         int j = MathHelper.floor_double((aabb.maxX + 2.0D) / 16.0D);
         int k = MathHelper.floor_double((aabb.minZ - 2.0D) / 16.0D);
         int l = MathHelper.floor_double((aabb.maxZ + 2.0D) / 16.0D);
-        List<T> list = Lists.<T>newArrayList();
+        List<T> list = Lists.newArrayList();
 
         for (int i1 = i; i1 <= j; ++i1)
         {
@@ -2831,7 +2831,7 @@ public abstract class World implements IBlockAccess
 
     public <T extends Entity> T findNearestEntityWithinAABB(Class <? extends T > entityType, AxisAlignedBB aabb, T closestTo)
     {
-        List<T> list = this.<T>getEntitiesWithinAABB(entityType, aabb);
+        List<T> list = this.getEntitiesWithinAABB(entityType, aabb);
         T t = null;
         double d0 = Double.MAX_VALUE;
 
@@ -2856,7 +2856,7 @@ public abstract class World implements IBlockAccess
 
     public Entity getEntityByID(int id)
     {
-        return (Entity)this.entitiesById.lookup(id);
+        return this.entitiesById.lookup(id);
     }
 
     public List<Entity> getLoadedEntityList()

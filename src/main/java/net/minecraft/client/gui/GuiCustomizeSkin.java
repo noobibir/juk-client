@@ -80,7 +80,7 @@ public class GuiCustomizeSkin extends GuiScreen
             s = I18n.format("options.off", new Object[0]);
         }
 
-        return playerModelParts.func_179326_d().getFormattedText() + ": " + s;
+        return playerModelParts.getPartNameComponent().getFormattedText() + ": " + s;
     }
 
     class ButtonPart extends GuiButton

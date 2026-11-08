@@ -10,23 +10,19 @@ public class PacketThreadUtil
 {
     public static int lastDimensionId = Integer.MIN_VALUE;
 
-    public static <T extends INetHandler> void checkThreadAndEnqueue(final Packet<T> p_180031_0_, final T p_180031_1_, IThreadListener p_180031_2_) throws ThreadQuickExitException
+    public static <T extends INetHandler> void checkThreadAndEnqueue(final Packet<T> packet, final T handler, IThreadListener listener) throws ThreadQuickExitException
     {
-        if (!p_180031_2_.isCallingFromMinecraftThread())
+        if (!listener.isCallingFromMinecraftThread())
         {
-            p_180031_2_.addScheduledTask(new Runnable()
-            {
-                public void run()
-                {
-                    PacketThreadUtil.clientPreProcessPacket(p_180031_0_);
-                    p_180031_0_.processPacket(p_180031_1_);
-                }
+            listener.addScheduledTask(() -> {
+                PacketThreadUtil.clientPreProcessPacket(packet);
+                packet.processPacket(handler);
             });
             throw ThreadQuickExitException.INSTANCE;
         }
         else
         {
-            clientPreProcessPacket(p_180031_0_);
+            clientPreProcessPacket(packet);
         }
     }
 

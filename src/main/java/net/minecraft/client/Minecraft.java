@@ -2192,10 +2192,10 @@ public class Minecraft implements IThreadListener, IPlayerUsage
             }
         }
 
-        this.displayGuiScreen((GuiScreen)null);
+        this.displayGuiScreen(null);
         SocketAddress socketaddress = this.theIntegratedServer.getNetworkSystem().addLocalEndpoint();
         NetworkManager networkmanager = NetworkManager.provideLocalClient(socketaddress);
-        networkmanager.setNetHandler(new NetHandlerLoginClient(networkmanager, this, (GuiScreen)null));
+        networkmanager.setNetHandler(new NetHandlerLoginClient(networkmanager, this, null));
         networkmanager.sendPacket(new C00Handshake(47, socketaddress.toString(), 0, EnumConnectionState.LOGIN));
         networkmanager.sendPacket(new C00PacketLoginStart(this.getSession().getProfile()));
         this.myNetworkManager = networkmanager;
@@ -2241,7 +2241,7 @@ public class Minecraft implements IThreadListener, IPlayerUsage
         {
             this.mcResourcePackRepository.clearResourcePack();
             this.ingameGUI.resetPlayersOverlayFooterHeader();
-            this.setServerData((ServerData)null);
+            this.setServerData(null);
             this.integratedServerIsRunning = false;
         }
 
@@ -2619,13 +2619,7 @@ public class Minecraft implements IThreadListener, IPlayerUsage
 
     public ListenableFuture<Object> scheduleResourcesRefresh()
     {
-        return this.addScheduledTask(new Runnable()
-        {
-            public void run()
-            {
-                Minecraft.this.refreshResources();
-            }
-        });
+        return this.addScheduledTask(Minecraft.this::refreshResources);
     }
 
     public void addServerStatsToSnooper(PlayerUsageSnooper playerSnooper)
