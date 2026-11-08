@@ -38,4 +38,7 @@ public class JukGlobals {
     public static final int choice_nameColor = 0xFFFFFFFF;
     public static final int choice_valueColor = 0xFFFFFFFF;
     public static final int choice_selectedValueColor = 0xFF6666FF;
+
+    public static final int input_nameColor = 0xFFFFFFFF;
+    public static final int input_valueColor = 0xFFBBBBBB;
 }

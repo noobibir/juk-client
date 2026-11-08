@@ -102,9 +102,15 @@ public class ClickGUI extends GuiScreen {
     @Override
     protected void keyTyped(char typedChar, int keyCode) throws IOException {
         super.keyTyped(typedChar, keyCode);
-        if (isAwaitingBind && this.ms != null) {
-            this.ms.setKey(keyCode);
-            isAwaitingBind = false;
+        if (this.ms != null) {
+            if (isAwaitingBind) {
+                this.ms.setKey(keyCode);
+                isAwaitingBind = false;
+            } else {
+                for (Setting s : ms.getSettings()) {
+                    s.keyTyped(typedChar, keyCode);
+                }
+            }
         }
     }
 

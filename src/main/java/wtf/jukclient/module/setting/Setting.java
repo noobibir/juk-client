@@ -21,6 +21,7 @@ public abstract class Setting {
     public abstract int getSettingHeight();
     public abstract boolean mouseClicked(int mouseX, int mouseY, int x, int y);
     public abstract boolean mouseReleased(int mouseX, int mouseY, int x, int y);
+    public void keyTyped(char typedChar, int keyCode) {}
     public boolean isRendered() {
         if (settingRenderFunc == null) {
             return true;

@@ -2,6 +2,7 @@ package wtf.jukclient.module.modules.movement;
 
 import me.zero.alpine.listener.Subscribe;
 import wtf.jukclient.event.AttackEvent;
+import wtf.jukclient.event.PlayerTickEvent;
 import wtf.jukclient.event.TickEvent;
 import wtf.jukclient.module.EnumCategory;
 import wtf.jukclient.module.Module;
@@ -14,7 +15,8 @@ public class Sprint extends Module {
     }
 
     @Subscribe
-    private void onTick(TickEvent event) {
+    private void onTick(PlayerTickEvent event) {
+        if (event.isCancelled()) return;
         if (mc.thePlayer.moveForward <= 0) return;
         if (mc.thePlayer.isCollidedHorizontally) return;
         if (noSprintNextTick) {
