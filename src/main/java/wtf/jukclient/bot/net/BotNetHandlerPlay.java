@@ -1,4 +1,4 @@
-package wtf.jukclient.bot;
+package wtf.jukclient.bot.net;
 
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
@@ -57,10 +57,8 @@ import net.minecraft.inventory.Container;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemMap;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.PacketThreadUtil;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.network.play.client.C00PacketKeepAlive;
 import net.minecraft.network.play.client.C03PacketPlayer;
@@ -166,26 +164,24 @@ import net.minecraft.world.WorldProviderSurface;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.MapData;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import wtf.jukclient.Juk;
-import wtf.jukclient.event.PacketEvent;
+import wtf.jukclient.bot.BotController;
+import wtf.jukclient.bot.BotData;
+import wtf.jukclient.bot.BotEntity;
+import wtf.jukclient.bot.BotWorld;
 import wtf.jukclient.util.ChatUtil;
 
 public class BotNetHandlerPlay implements INetHandlerPlayClient
 {
-    private static final Logger logger = LogManager.getLogger();
-    private final NetworkManager netManager;
+    private final BotNetManager netManager;
     private final GameProfile profile;
     private final BotData bot;
     private BotWorld clientWorldController;
     private boolean doneLoadingTerrain;
     private final Map<UUID, NetworkPlayerInfo> playerInfoMap = Maps.newHashMap();
     public int currentServerMaxPlayers = 20;
-    private boolean field_147308_k = false;
     private final Random avRandomizer = new Random();
 
-    public BotNetHandlerPlay(BotData botIn, NetworkManager netManager, GameProfile gameProfile)
+    public BotNetHandlerPlay(BotData botIn, BotNetManager netManager, GameProfile gameProfile)
     {
         this.bot = botIn;
         this.netManager = netManager;
@@ -199,9 +195,10 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleJoinGame(S01PacketJoinGame packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         this.bot.controller = new BotController(this.bot, this);
-        this.clientWorldController = new BotWorld(this, new WorldSettings(0L, packetIn.getGameType(), false, packetIn.isHardcoreMode(), packetIn.getWorldType()), packetIn.getDimension(), packetIn.getDifficulty());
+        this.clientWorldController = new BotWorld(this, new WorldSettings(0L, packetIn.getGameType(), false, packetIn.isHardcoreMode(), packetIn.getWorldType()), packetIn.getDimension(), packetIn.getDifficulty(), bot);
+        this.bot.loadWorld(this.clientWorldController);
         this.bot.settings.difficulty = packetIn.getDifficulty();
         this.bot.player.dimension = packetIn.getDimension();
         this.bot.player.setEntityId(packetIn.getEntityId());
@@ -214,7 +211,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleSpawnObject(S0EPacketSpawnObject packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         double d0 = (double)packetIn.getX() / 32.0D;
         double d1 = (double)packetIn.getY() / 32.0D;
         double d2 = (double)packetIn.getZ() / 32.0D;
@@ -263,7 +260,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
         }
         else if (packetIn.getType() == 76)
         {
-            entity = new EntityFireworkRocket(this.clientWorldController, d0, d1, d2, (ItemStack)null);
+            entity = new EntityFireworkRocket(this.clientWorldController, d0, d1, d2, null);
         }
         else if (packetIn.getType() == 63)
         {
@@ -361,7 +358,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleSpawnExperienceOrb(S11PacketSpawnExperienceOrb packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         Entity entity = new EntityXPOrb(this.clientWorldController, (double)packetIn.getX() / 32.0D, (double)packetIn.getY() / 32.0D, (double)packetIn.getZ() / 32.0D, packetIn.getXPValue());
         entity.serverPosX = packetIn.getX();
         entity.serverPosY = packetIn.getY();
@@ -374,7 +371,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleSpawnGlobalEntity(S2CPacketSpawnGlobalEntity packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         double d0 = (double)packetIn.func_149051_d() / 32.0D;
         double d1 = (double)packetIn.func_149050_e() / 32.0D;
         double d2 = (double)packetIn.func_149049_f() / 32.0D;
@@ -399,14 +396,14 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleSpawnPainting(S10PacketSpawnPainting packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         EntityPainting entitypainting = new EntityPainting(this.clientWorldController, packetIn.getPosition(), packetIn.getFacing(), packetIn.getTitle());
         this.clientWorldController.addEntityToWorld(packetIn.getEntityID(), entitypainting);
     }
 
     public void handleEntityVelocity(S12PacketEntityVelocity packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         Entity entity = this.clientWorldController.getEntityByID(packetIn.getEntityID());
 
         if (entity != null)
@@ -417,7 +414,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleEntityMetadata(S1CPacketEntityMetadata packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         Entity entity = this.clientWorldController.getEntityByID(packetIn.getEntityId());
 
         if (entity != null && packetIn.func_149376_c() != null)
@@ -428,7 +425,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleSpawnPlayer(S0CPacketSpawnPlayer packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         double d0 = (double)packetIn.getX() / 32.0D;
         double d1 = (double)packetIn.getY() / 32.0D;
         double d2 = (double)packetIn.getZ() / 32.0D;
@@ -461,7 +458,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleEntityTeleport(S18PacketEntityTeleport packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         Entity entity = this.clientWorldController.getEntityByID(packetIn.getEntityId());
 
         if (entity != null)
@@ -490,7 +487,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleHeldItemChange(S09PacketHeldItemChange packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
 
         if (packetIn.getHeldItemHotbarIndex() >= 0 && packetIn.getHeldItemHotbarIndex() < InventoryPlayer.getHotbarSize())
         {
@@ -500,7 +497,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleEntityMovement(S14PacketEntity packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         Entity entity = packetIn.getEntity(this.clientWorldController);
 
         if (entity != null)
@@ -520,7 +517,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleEntityHeadLook(S19PacketEntityHeadLook packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         Entity entity = packetIn.getEntity(this.clientWorldController);
 
         if (entity != null)
@@ -532,7 +529,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleDestroyEntities(S13PacketDestroyEntities packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
 
         for (int i = 0; i < packetIn.getEntityIDs().length; ++i)
         {
@@ -542,7 +539,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handlePlayerPosLook(S08PacketPlayerPosLook packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         EntityPlayer entityplayer = this.bot.player;
         double d0 = packetIn.getX();
         double d1 = packetIn.getY();
@@ -602,7 +599,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleMultiBlockChange(S22PacketMultiBlockChange packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
 
         for (S22PacketMultiBlockChange.BlockUpdateData s22packetmultiblockchange$blockupdatedata : packetIn.getChangedBlocks())
         {
@@ -612,7 +609,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleChunkData(S21PacketChunkData packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
 
         if (packetIn.func_149274_i())
         {
@@ -638,7 +635,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleBlockChange(S23PacketBlockChange packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         this.clientWorldController.invalidateRegionAndSetBlock(packetIn.getBlockPosition(), packetIn.getBlockState());
     }
 
@@ -647,69 +644,28 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
         this.netManager.closeChannel(packetIn.getReason());
     }
 
-    public void onDisconnect(IChatComponent reason)
-    {
+    public void onDisconnect(IChatComponent reason) {
         this.bot.loadWorld(null);
         ChatUtil.send("bot disconnected: %s", reason.getUnformattedTextForChat());
-
-//        if (this.guiScreenServer != null)
-//        {
-//            if (this.guiScreenServer instanceof GuiScreenRealmsProxy)
-//            {
-//                this.bot.displayGuiScreen((new DisconnectedRealmsScreen(((GuiScreenRealmsProxy)this.guiScreenServer).func_154321_a(), "disconnect.lost", reason)).getProxy());
-//            }
-//            else
-//            {
-//                this.bot.displayGuiScreen(new GuiDisconnected(this.guiScreenServer, "disconnect.lost", reason));
-//            }
-//        }
-//        else
-//        {
-//            this.bot.displayGuiScreen(new GuiDisconnected(new GuiMultiplayer(new GuiMainMenu()), "disconnect.lost", reason));
-//        }
     }
 
     public void addToSendQueue(Packet<?> packet) {
-        PacketEvent event = new PacketEvent(packet);
-        event.flow = PacketEvent.EventFlow.OUTBOUND;
-        Juk.getInstance().eventManager.post(event);
-
-        if (event.isCancelled())
-            return;
-        packet = event.packet;
-
         this.netManager.sendPacket(packet);
     }
 
     public void handleCollectItem(S0DPacketCollectItem packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         Entity entity = this.clientWorldController.getEntityByID(packetIn.getCollectedItemEntityID());
-        EntityLivingBase entitylivingbase = (EntityLivingBase)this.clientWorldController.getEntityByID(packetIn.getEntityID());
 
-        if (entitylivingbase == null)
-        {
-            entitylivingbase = this.bot.player;
-        }
-
-        if (entity != null)
-        {
-            if (entity instanceof EntityXPOrb)
-            {
-                this.clientWorldController.playSoundAtEntity(entity, "random.orb", 0.2F, ((this.avRandomizer.nextFloat() - this.avRandomizer.nextFloat()) * 0.7F + 1.0F) * 2.0F);
-            }
-            else
-            {
-                this.clientWorldController.playSoundAtEntity(entity, "random.pop", 0.2F, ((this.avRandomizer.nextFloat() - this.avRandomizer.nextFloat()) * 0.7F + 1.0F) * 2.0F);
-            }
-
+        if (entity != null) {
             this.clientWorldController.removeEntityFromWorld(packetIn.getCollectedItemEntityID());
         }
     }
 
     public void handleChat(S02PacketChat packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
 
         if (packetIn.getType() == 2)
         {
@@ -723,7 +679,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleAnimation(S0BPacketAnimation packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         Entity entity = this.clientWorldController.getEntityByID(packetIn.getEntityID());
 
         if (entity != null)
@@ -747,13 +703,13 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleUseBed(S0APacketUseBed packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         packetIn.getPlayer(this.clientWorldController).trySleep(packetIn.getBedPosition());
     }
 
     public void handleSpawnMob(S0FPacketSpawnMob packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         double d0 = (double)packetIn.getX() / 32.0D;
         double d1 = (double)packetIn.getY() / 32.0D;
         double d2 = (double)packetIn.getZ() / 32.0D;
@@ -792,21 +748,21 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleTimeUpdate(S03PacketTimeUpdate packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         this.bot.world.setTotalWorldTime(packetIn.getTotalWorldTime());
         this.bot.world.setWorldTime(packetIn.getWorldTime());
     }
 
     public void handleSpawnPosition(S05PacketSpawnPosition packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         this.bot.player.setSpawnPoint(packetIn.getSpawnPos(), true);
         this.bot.world.getWorldInfo().setSpawn(packetIn.getSpawnPos());
     }
 
     public void handleEntityAttach(S1BPacketEntityAttach packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         Entity entity = this.clientWorldController.getEntityByID(packetIn.getEntityId());
         Entity entity1 = this.clientWorldController.getEntityByID(packetIn.getVehicleEntityId());
 
@@ -850,7 +806,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleEntityStatus(S19PacketEntityStatus packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         Entity entity = packetIn.getEntity(this.clientWorldController);
 
         if (entity != null)
@@ -863,7 +819,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleUpdateHealth(S06PacketUpdateHealth packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         this.bot.player.setBotHealth(packetIn.getHealth());
         this.bot.player.getFoodStats().setFoodLevel(packetIn.getFoodLevel());
         this.bot.player.getFoodStats().setFoodSaturationLevel(packetIn.getSaturationLevel());
@@ -871,13 +827,13 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleSetExperience(S1FPacketSetExperience packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         this.bot.player.setXPStats(packetIn.func_149397_c(), packetIn.getTotalExperience(), packetIn.getLevel());
     }
 
     public void handleRespawn(S07PacketRespawn packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
 
         if (packetIn.getDimensionID() != this.bot.player.dimension)
         {
@@ -889,7 +845,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
                             this.bot.world.getWorldInfo().isHardcoreModeEnabled(),
                             packetIn.getWorldType()),
                     packetIn.getDimensionID(),
-                    packetIn.getDifficulty());
+                    packetIn.getDifficulty(), bot);
             this.clientWorldController.setWorldScoreboard(scoreboard);
             this.bot.loadWorld(this.clientWorldController);
             this.bot.player.dimension = packetIn.getDimensionID();
@@ -902,7 +858,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleExplosion(S27PacketExplosion packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         Explosion explosion = new Explosion(this.bot.world, null, packetIn.getX(), packetIn.getY(), packetIn.getZ(), packetIn.getStrength(), packetIn.getAffectedBlockPositions());
         explosion.doExplosionB(true);
         this.bot.player.motionX += packetIn.func_149149_c();
@@ -912,7 +868,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleOpenWindow(S2DPacketOpenWindow packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         BotEntity entityplayersp = this.bot.player;
 
         if ("bot:container".equals(packetIn.getGuiId()))
@@ -950,7 +906,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleSetSlot(S2FPacketSetSlot packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         EntityPlayer entityplayer = this.bot.player;
 
         if (packetIn.func_149175_c() == -1) {
@@ -977,7 +933,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleConfirmTransaction(S32PacketConfirmTransaction packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         Container container = null;
         EntityPlayer entityplayer = this.bot.player;
 
@@ -998,7 +954,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleWindowItems(S30PacketWindowItems packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         EntityPlayer entityplayer = this.bot.player;
 
         if (packetIn.func_148911_c() == 0)
@@ -1013,7 +969,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleSignEditorOpen(S36PacketSignEditorOpen packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         TileEntity tileentity = this.clientWorldController.getTileEntity(packetIn.getSignPosition());
 
         if (!(tileentity instanceof TileEntitySign))
@@ -1028,7 +984,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleUpdateSign(S33PacketUpdateSign packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         boolean flag = false;
 
         if (this.bot.world.isBlockLoaded(packetIn.getPos()))
@@ -1057,7 +1013,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleUpdateTileEntity(S35PacketUpdateTileEntity packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
 
         if (this.bot.world.isBlockLoaded(packetIn.getPos()))
         {
@@ -1073,7 +1029,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleWindowProperty(S31PacketWindowProperty packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         EntityPlayer entityplayer = this.bot.player;
 
         if (entityplayer.openContainer != null && entityplayer.openContainer.windowId == packetIn.getWindowId())
@@ -1084,7 +1040,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleEntityEquipment(S04PacketEntityEquipment packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         Entity entity = this.clientWorldController.getEntityByID(packetIn.getEntityID());
 
         if (entity != null)
@@ -1095,25 +1051,25 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleCloseWindow(S2EPacketCloseWindow packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         this.bot.player.closeScreenAndDropStack();
     }
 
     public void handleBlockAction(S24PacketBlockAction packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         this.bot.world.addBlockEvent(packetIn.getBlockPosition(), packetIn.getBlockType(), packetIn.getData1(), packetIn.getData2());
     }
 
     public void handleBlockBreakAnim(S25PacketBlockBreakAnim packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         this.bot.world.sendBlockBreakProgress(packetIn.getBreakerId(), packetIn.getPosition(), packetIn.getProgress());
     }
 
     public void handleMapChunkBulk(S26PacketMapChunkBulk packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
 
         for (int i = 0; i < packetIn.getChunkCount(); ++i)
         {
@@ -1134,7 +1090,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleChangeGameState(S2BPacketChangeGameState packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         EntityPlayer entityplayer = this.bot.player;
         int i = packetIn.getGameState();
         float f = packetIn.func_149137_d();
@@ -1153,14 +1109,14 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleMaps(S34PacketMaps packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         MapData mapdata = ItemMap.loadMapData(packetIn.getMapId(), this.bot.world);
         packetIn.setMapdataTo(mapdata);
     }
 
     public void handleEffect(S28PacketEffect packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
 
         if (packetIn.isSoundServerwide())
         {
@@ -1174,12 +1130,12 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleStatistics(S37PacketStatistics packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
     }
 
     public void handleEntityEffect(S1DPacketEntityEffect packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         Entity entity = this.clientWorldController.getEntityByID(packetIn.getEntityId());
 
         if (entity instanceof EntityLivingBase)
@@ -1192,7 +1148,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleCombatEvent(S42PacketCombatEvent packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         Entity entity = this.clientWorldController.getEntityByID(packetIn.field_179775_c);
         EntityLivingBase entitylivingbase = entity instanceof EntityLivingBase ? (EntityLivingBase)entity : null;
 
@@ -1217,26 +1173,26 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleServerDifficulty(S41PacketServerDifficulty packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         this.bot.world.getWorldInfo().setDifficulty(packetIn.getDifficulty());
         this.bot.world.getWorldInfo().setDifficultyLocked(packetIn.isDifficultyLocked());
     }
 
     public void handleCamera(S43PacketCamera packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
     }
 
     public void handleWorldBorder(S44PacketWorldBorder packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         packetIn.func_179788_a(this.clientWorldController.getWorldBorder());
     }
 
     @SuppressWarnings("incomplete-switch")
     public void handleTitle(S45PacketTitle packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
     }
 
     public void handleSetCompressionLevel(S46PacketSetCompressionLevel packetIn)
@@ -1255,7 +1211,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleRemoveEntityEffect(S1EPacketRemoveEntityEffect packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         Entity entity = this.clientWorldController.getEntityByID(packetIn.getEntityId());
 
         if (entity instanceof EntityLivingBase)
@@ -1267,7 +1223,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
     @SuppressWarnings("incomplete-switch")
     public void handlePlayerListItem(S38PacketPlayerListItem packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
 
         for (S38PacketPlayerListItem.AddPlayerData s38packetplayerlistitem$addplayerdata : packetIn.getEntries())
         {
@@ -1317,7 +1273,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handlePlayerAbilities(S39PacketPlayerAbilities packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         EntityPlayer entityplayer = this.bot.player;
         entityplayer.capabilities.isFlying = packetIn.isFlying();
         entityplayer.capabilities.isCreativeMode = packetIn.isCreativeMode();
@@ -1329,7 +1285,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleTabComplete(S3APacketTabComplete packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         String[] astring = packetIn.func_149630_c();
 
 //        if (this.bot.currentScreen instanceof GuiChat)
@@ -1341,7 +1297,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleSoundEffect(S29PacketSoundEffect packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         //this.bot.world.playSound(packetIn.getX(), packetIn.getY(), packetIn.getZ(), packetIn.getSoundName(), packetIn.getVolume(), packetIn.getPitch(), false);
     }
 
@@ -1362,7 +1318,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleEntityNBT(S49PacketUpdateEntityNBT packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         Entity entity = packetIn.getEntity(this.clientWorldController);
 
         if (entity != null)
@@ -1373,7 +1329,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleCustomPayload(S3FPacketCustomPayload packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
 
         if ("MC|TrList".equals(packetIn.getChannelName()))
         {
@@ -1417,7 +1373,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleScoreboardObjective(S3BPacketScoreboardObjective packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         Scoreboard scoreboard = this.clientWorldController.getScoreboard();
 
         if (packetIn.func_149338_e() == 0)
@@ -1444,7 +1400,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleUpdateScore(S3CPacketUpdateScore packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         Scoreboard scoreboard = this.clientWorldController.getScoreboard();
         ScoreObjective scoreobjective = scoreboard.getObjective(packetIn.getObjectiveName());
 
@@ -1468,7 +1424,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleDisplayScoreboard(S3DPacketDisplayScoreboard packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         Scoreboard scoreboard = this.clientWorldController.getScoreboard();
 
         if (packetIn.func_149370_d().length() == 0)
@@ -1484,7 +1440,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleTeams(S3EPacketTeams packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         Scoreboard scoreboard = this.clientWorldController.getScoreboard();
         ScorePlayerTeam scoreplayerteam;
 
@@ -1536,12 +1492,12 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public void handleParticles(S2APacketParticles packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
     }
 
     public void handleEntityProperties(S20PacketEntityProperties packetIn)
     {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
+        BotPacketUtil.checkThreadAndEnqueue(packetIn, this, this.bot);
         Entity entity = this.clientWorldController.getEntityByID(packetIn.getEntityId());
 
         if (entity != null)
@@ -1575,7 +1531,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
         }
     }
 
-    public NetworkManager getNetworkManager()
+    public BotNetManager getNetworkManager()
     {
         return this.netManager;
     }
@@ -1587,7 +1543,7 @@ public class BotNetHandlerPlay implements INetHandlerPlayClient
 
     public NetworkPlayerInfo getPlayerInfo(UUID p_175102_1_)
     {
-        return (NetworkPlayerInfo)this.playerInfoMap.get(p_175102_1_);
+        return this.playerInfoMap.get(p_175102_1_);
     }
 
     public NetworkPlayerInfo getPlayerInfo(String p_175104_1_)

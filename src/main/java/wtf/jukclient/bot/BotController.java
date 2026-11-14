@@ -4,8 +4,6 @@ import lombok.Getter;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityHorse;
@@ -23,11 +21,11 @@ import net.minecraft.network.play.client.C11PacketEnchantItem;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSettings;
 import wtf.jukclient.Juk;
+import wtf.jukclient.bot.net.BotNetHandlerPlay;
 import wtf.jukclient.event.AttackEvent;
 
 public class BotController
@@ -302,7 +300,7 @@ public class BotController
 
         if (this.netClientHandler.getNetworkManager().isChannelOpen())
         {
-            this.netClientHandler.getNetworkManager().processReceivedPackets();
+            this.netClientHandler.getNetworkManager().processPackets();
         }
         else
         {

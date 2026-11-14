@@ -186,6 +186,7 @@ import org.lwjgl.opengl.PixelFormat;
 import org.lwjgl.util.glu.GLU;
 import wtf.jukclient.Juk;
 import wtf.jukclient.JukGlobals;
+import wtf.jukclient.event.GameLoopEvent;
 import wtf.jukclient.event.KeyEvent;
 import wtf.jukclient.event.TickEvent;
 
@@ -973,6 +974,8 @@ public class Minecraft implements IThreadListener, IPlayerUsage
 
     private void runGameLoop() throws IOException
     {
+        Juk.getInstance().eventManager.post(new GameLoopEvent());
+
         long i = System.nanoTime();
         this.mcProfiler.startSection("root");
 

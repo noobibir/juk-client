@@ -4,6 +4,7 @@ import me.zero.alpine.listener.Subscribe;
 import net.minecraft.util.ChatComponentText;
 import wtf.jukclient.bot.BotHelper;
 import wtf.jukclient.bot.BotData;
+import wtf.jukclient.event.GameLoopEvent;
 import wtf.jukclient.event.TickEvent;
 import wtf.jukclient.module.EnumCategory;
 import wtf.jukclient.module.Module;
@@ -33,24 +34,21 @@ public class Bot extends Module {
     @Override
     public void onEnable() {
         super.onEnable();
+        if (port.get().isEmpty() || host.get().isEmpty() || username.get().length() < 3) {
+            super.onDisable();
+            return;
+        }
         bot = BotHelper.createBot(host.get(), Integer.parseInt(port.get()), username.get());
     }
 
     @Override
     public void onDisable() {
         super.onDisable();
-        bot.netManager.closeChannel(new ChatComponentText("disconnected"));
+        bot.disconnectAndKillThread();
     }
 
     @Subscribe
     private void onTick(TickEvent event) {
-        if (this.bot.netManager.isChannelOpen())
-        {
-            this.bot.netManager.processReceivedPackets();
-        }
-        else
-        {
-            this.bot.netManager.checkDisconnected();
-        }
+        bot.runTick();
     }
 }

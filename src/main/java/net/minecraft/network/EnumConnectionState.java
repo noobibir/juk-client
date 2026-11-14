@@ -283,12 +283,12 @@ public enum EnumConnectionState
 
     public Integer getPacketId(EnumPacketDirection direction, Packet packetIn)
     {
-        return (Integer)((BiMap)this.directionMaps.get(direction)).inverse().get(packetIn.getClass());
+        return this.directionMaps.get(direction).inverse().get(packetIn.getClass());
     }
 
     public Packet getPacket(EnumPacketDirection direction, int packetId) throws InstantiationException, IllegalAccessException {
-        Class <? extends Packet > oclass = (Class)((BiMap)this.directionMaps.get(direction)).get(Integer.valueOf(packetId));
-        return oclass == null ? null : (Packet)oclass.newInstance();
+        Class <? extends Packet> oclass = this.directionMaps.get(direction).get(packetId);
+        return oclass == null ? null : oclass.newInstance();
     }
 
     public int getId()
@@ -303,7 +303,7 @@ public enum EnumConnectionState
 
     public static EnumConnectionState getFromPacket(Packet packetIn)
     {
-        return (EnumConnectionState)STATES_BY_CLASS.get(packetIn.getClass());
+        return STATES_BY_CLASS.get(packetIn.getClass());
     }
 
     static {

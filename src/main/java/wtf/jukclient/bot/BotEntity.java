@@ -31,8 +31,8 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.MovementInput;
 import net.minecraft.world.IInteractionObject;
-import wtf.jukclient.Juk;
-import wtf.jukclient.event.*;
+import wtf.jukclient.bot.net.BotNetHandlerPlay;
+import wtf.jukclient.util.ChatUtil;
 
 public class BotEntity extends AbstractClientPlayer
 {
@@ -90,23 +90,15 @@ public class BotEntity extends AbstractClientPlayer
         }
     }
 
-    public void onUpdate()
-    {
-        PlayerTickEvent event = new PlayerTickEvent();
-        Juk.getInstance().eventManager.post(event);
-        if (event.isCancelled()) return;
-
-        if (this.worldObj.isBlockLoaded(new BlockPos(this.posX, 0.0D, this.posZ)))
-        {
+    public void onUpdate() {
+        if (this.worldObj.isBlockLoaded(new BlockPos(this.posX, 0.0D, this.posZ))) {
             super.onUpdate();
 
-            if (this.isRiding())
-            {
+            if (this.isRiding()) {
                 this.sendQueue.addToSendQueue(new C03PacketPlayer.C05PacketPlayerLook(this.rotationYaw, this.rotationPitch, this.onGround));
                 this.sendQueue.addToSendQueue(new C0CPacketInput(this.moveStrafing, this.moveForward, this.movementInput.jump, this.movementInput.sneak));
             }
-            else
-            {
+            else {
                 this.onUpdateWalkingPlayer();
             }
         }
@@ -150,10 +142,8 @@ public class BotEntity extends AbstractClientPlayer
         double d1 = this.getEntityBoundingBox().minY - this.lastReportedPosY;
         double d2 = this.posZ - this.lastReportedPosZ;
 
-        PlayerRotEvent event = new PlayerRotEvent(this.rotationYaw, this.rotationPitch);
-        Juk.getInstance().eventManager.post(event);
-        float yaw = event.yaw;
-        float pitch = event.pitch;
+        float yaw = this.rotationYaw;
+        float pitch = this.rotationPitch;
 
         double d3 = yaw - this.lastReportedYaw;
         double d4 = pitch - this.lastReportedPitch;
@@ -215,10 +205,6 @@ public class BotEntity extends AbstractClientPlayer
 
     public void sendChatMessage(String message)
     {
-        ChatMessageEvent event = new ChatMessageEvent(message);
-        Juk.getInstance().eventManager.post(event);
-        if (event.isCancelled()) return;
-        message = event.message;
         this.sendQueue.addToSendQueue(new C01PacketChatMessage(message));
     }
 
@@ -610,21 +596,9 @@ public class BotEntity extends AbstractClientPlayer
         this.movementInput.updatePlayerMoveState();
 
         if (this.isUsingItem() && !this.isRiding()) {
-            float moveStrafeFactor = 0.2f;
-            float moveForwardFactor = 0.2f;
-            SlowdownEvent event = new SlowdownEvent(moveStrafeFactor, moveForwardFactor, this.getItemInUse());
-            Juk.getInstance().eventManager.post(event);
+            this.movementInput.moveStrafe *= 0.2f;
+            this.movementInput.moveForward *= 0.2f;
 
-            if (event.isCancelled()) {
-                moveForwardFactor = 1;
-                moveStrafeFactor = 1;
-            } else {
-                moveForwardFactor = event.moveForwardFactor;
-                moveStrafeFactor = event.moveStrafeFactor;
-            }
-
-            this.movementInput.moveStrafe *= moveForwardFactor;
-            this.movementInput.moveForward *= moveStrafeFactor;
             this.sprintToggleTimer = 0;
         }
 

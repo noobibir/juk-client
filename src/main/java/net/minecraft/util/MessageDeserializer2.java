@@ -10,20 +10,19 @@ import net.minecraft.network.PacketBuffer;
 
 public class MessageDeserializer2 extends ByteToMessageDecoder
 {
-    protected void decode(ChannelHandlerContext p_decode_1_, ByteBuf p_decode_2_, List<Object> p_decode_3_) throws Exception
-    {
-        p_decode_2_.markReaderIndex();
+    protected void decode(ChannelHandlerContext ctx, ByteBuf buf, List<Object> p_decode_3_) {
+        buf.markReaderIndex();
         byte[] abyte = new byte[3];
 
         for (int i = 0; i < abyte.length; ++i)
         {
-            if (!p_decode_2_.isReadable())
+            if (!buf.isReadable())
             {
-                p_decode_2_.resetReaderIndex();
+                buf.resetReaderIndex();
                 return;
             }
 
-            abyte[i] = p_decode_2_.readByte();
+            abyte[i] = buf.readByte();
 
             if (abyte[i] >= 0)
             {
@@ -33,13 +32,13 @@ public class MessageDeserializer2 extends ByteToMessageDecoder
                 {
                     int j = packetbuffer.readVarIntFromBuffer();
 
-                    if (p_decode_2_.readableBytes() >= j)
+                    if (buf.readableBytes() >= j)
                     {
-                        p_decode_3_.add(p_decode_2_.readBytes(j));
+                        p_decode_3_.add(buf.readBytes(j));
                         return;
                     }
 
-                    p_decode_2_.resetReaderIndex();
+                    buf.resetReaderIndex();
                 }
                 finally
                 {

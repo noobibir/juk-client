@@ -3,27 +3,19 @@ package wtf.jukclient.bot;
 import com.google.common.collect.Sets;
 
 import java.util.Iterator;
-import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.Callable;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.MovingSoundMinecart;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.multiplayer.ChunkProviderClient;
-import net.minecraft.client.multiplayer.PlayerControllerMP;
-import net.minecraft.client.network.NetHandlerPlayClient;
-import net.minecraft.client.particle.EntityFirework;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.profiler.Profiler;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.src.Config;
 import net.minecraft.tileentity.TileEntity;
@@ -34,10 +26,10 @@ import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.storage.SaveDataMemoryStorage;
 import net.minecraft.world.storage.SaveHandlerMP;
 import net.minecraft.world.storage.WorldInfo;
-import net.optifine.CustomGuis;
 import net.optifine.DynamicLights;
 import net.optifine.override.PlayerControllerOF;
-import net.optifine.reflect.Reflector;
+import wtf.jukclient.bot.net.BotNetHandlerPlay;
+import wtf.jukclient.util.ChatUtil;
 
 public class BotWorld extends World
 {
@@ -45,19 +37,19 @@ public class BotWorld extends World
     private ChunkProviderClient clientChunkProvider;
     private final Set<Entity> entityList = Sets.<Entity>newHashSet();
     private final Set<Entity> entitySpawnQueue = Sets.<Entity>newHashSet();
-    private final Minecraft mc = Minecraft.getMinecraft();
+    private final BotData bot;
     private final Set<ChunkCoordIntPair> previousActiveChunkSet = Sets.newHashSet();
-    private boolean playerUpdate = false;
 
-    public BotWorld(BotNetHandlerPlay netHandler, WorldSettings settings, int dimension, EnumDifficulty difficulty)
+    public BotWorld(BotNetHandlerPlay netHandler, WorldSettings settings, int dimension, EnumDifficulty difficulty, BotData bot)
     {
-        super(new SaveHandlerMP(), new WorldInfo(settings, "MpServer"), WorldProvider.getProviderForDimension(dimension), null, true);
+        super(new SaveHandlerMP(), new WorldInfo(settings, "jukServer"), WorldProvider.getProviderForDimension(dimension), new BotProfiler(), true);
         this.sendQueue = netHandler;
         this.getWorldInfo().setDifficulty(difficulty);
         this.provider.registerWorld(this);
         this.setSpawnPoint(new BlockPos(8, 64, 8));
         this.chunkProvider = this.createChunkProvider();
         this.mapStorage = new SaveDataMemoryStorage();
+        this.bot = bot;
         this.calculateInitialSkylight();
         this.calculateInitialWeather();
     }
@@ -154,10 +146,6 @@ public class BotWorld extends World
         {
             this.entitySpawnQueue.add(entityIn);
         }
-        else if (entityIn instanceof EntityMinecart)
-        {
-            this.mc.getSoundHandler().playSound(new MovingSoundMinecart((EntityMinecart)entityIn));
-        }
 
         return flag;
     }
@@ -181,14 +169,12 @@ public class BotWorld extends World
     protected void onEntityRemoved(Entity entityIn)
     {
         super.onEntityRemoved(entityIn);
-        boolean flag = false;
 
         if (this.entityList.contains(entityIn))
         {
             if (entityIn.isEntityAlive())
             {
                 this.entitySpawnQueue.add(entityIn);
-                flag = true;
             }
             else
             {
@@ -219,7 +205,7 @@ public class BotWorld extends World
 
     public Entity getEntityByID(int id)
     {
-        return id == this.mc.thePlayer.getEntityId() ? this.mc.thePlayer : super.getEntityByID(id);
+        return id == this.bot.player.getEntityId() ? this.bot.player : super.getEntityByID(id);
     }
 
     public Entity removeEntityFromWorld(int entityID)
@@ -286,30 +272,15 @@ public class BotWorld extends World
         {
             Entity entity = this.weatherEffects.get(i);
 
-            try
-            {
+            try {
                 ++entity.ticksExisted;
                 entity.onUpdate();
             }
-            catch (Throwable throwable2)
-            {
-                CrashReport crashreport = CrashReport.makeCrashReport(throwable2, "Ticking entity");
-                CrashReportCategory crashreportcategory = crashreport.makeCategory("Entity being ticked");
+            catch (Throwable throwable2) {
 
-                if (entity == null)
-                {
-                    crashreportcategory.addCrashSection("Entity", "~~NULL~~");
-                }
-                else
-                {
-                    entity.addEntityCrashInfo(crashreportcategory);
-                }
-
-                throw new ReportedException(crashreport);
             }
 
-            if (entity.isDead)
-            {
+            if (entity.isDead) {
                 this.weatherEffects.remove(i--);
             }
         }
@@ -354,10 +325,8 @@ public class BotWorld extends World
                 }
                 catch (Throwable throwable1)
                 {
-                    CrashReport crashreport1 = CrashReport.makeCrashReport(throwable1, "Ticking entity");
-                    CrashReportCategory crashreportcategory2 = crashreport1.makeCategory("Entity being ticked");
-                    entity2.addEntityCrashInfo(crashreportcategory2);
-                    throw new ReportedException(crashreport1);
+                    ChatUtil.send("exception thrown when ticking entity");
+                    throwable1.printStackTrace();
                 }
             }
 
@@ -544,7 +513,7 @@ public class BotWorld extends World
 
     protected int getRenderDistanceChunks()
     {
-        return this.mc.gameSettings.renderDistanceChunks;
+        return BotSettings.renderDistanceChunks;
     }
 
     public void removeAllEntities()
@@ -602,30 +571,9 @@ public class BotWorld extends World
         CrashReportCategory crashreportcategory = super.addWorldInfoToCrashReport(report);
         crashreportcategory.addCrashSectionCallable("Forced entities", () -> BotWorld.this.entityList.size() + " total; " + BotWorld.this.entityList);
         crashreportcategory.addCrashSectionCallable("Retry entities", () -> BotWorld.this.entitySpawnQueue.size() + " total; " + BotWorld.this.entitySpawnQueue);
-        crashreportcategory.addCrashSectionCallable("Server brand", () -> BotWorld.this.mc.thePlayer.getClientBrand());
-        crashreportcategory.addCrashSectionCallable("Server type", () -> BotWorld.this.mc.getIntegratedServer() == null ? "Non-integrated multiplayer server" : "Integrated singleplayer server");
+        crashreportcategory.addCrashSectionCallable("Server brand", () -> BotWorld.this.bot.player.getClientBrand());
+        crashreportcategory.addCrashSectionCallable("Server type", () -> "Non-integrated multiplayer server");
         return crashreportcategory;
-    }
-
-    public void playSoundAtPos(BlockPos pos, String soundName, float volume, float pitch, boolean distanceDelay)
-    {
-        this.playSound((double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, soundName, volume, pitch, distanceDelay);
-    }
-
-    public void playSound(double x, double y, double z, String soundName, float volume, float pitch, boolean distanceDelay)
-    {
-        double d0 = this.mc.getRenderViewEntity().getDistanceSq(x, y, z);
-        PositionedSoundRecord positionedsoundrecord = new PositionedSoundRecord(new ResourceLocation(soundName), volume, pitch, (float)x, (float)y, (float)z);
-
-        if (distanceDelay && d0 > 100.0D)
-        {
-            double d1 = Math.sqrt(d0) / 40.0D;
-            this.mc.getSoundHandler().playDelayedSound(positionedsoundrecord, (int)(d1 * 20.0D));
-        }
-        else
-        {
-            this.mc.getSoundHandler().playSound(positionedsoundrecord);
-        }
     }
 
     @Override
@@ -825,29 +773,7 @@ public class BotWorld extends World
         return i;
     }
 
-    public boolean setBlockState(BlockPos pos, IBlockState newState, int flags)
-    {
-        this.playerUpdate = this.isPlayerActing();
-        boolean flag = super.setBlockState(pos, newState, flags);
-        this.playerUpdate = false;
-        return flag;
-    }
-
-    private boolean isPlayerActing()
-    {
-        if (this.mc.playerController instanceof PlayerControllerOF)
-        {
-            PlayerControllerOF playercontrollerof = (PlayerControllerOF)this.mc.playerController;
-            return playercontrollerof.isActing();
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    public boolean isPlayerUpdate()
-    {
-        return this.playerUpdate;
+    public boolean setBlockState(BlockPos pos, IBlockState newState, int flags) {
+        return super.setBlockState(pos, newState, flags);
     }
 }
