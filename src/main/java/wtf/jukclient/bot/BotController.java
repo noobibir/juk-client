@@ -24,9 +24,7 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSettings;
-import wtf.jukclient.Juk;
 import wtf.jukclient.bot.net.BotNetHandlerPlay;
-import wtf.jukclient.event.AttackEvent;
 
 public class BotController
 {
@@ -35,7 +33,6 @@ public class BotController
     private BlockPos currentBlock = new BlockPos(-1, -1, -1);
     private ItemStack currentItemHittingBlock;
     private float curBlockDamageMP;
-    private float stepSoundTickCounter;
     private int blockHitDelay;
     private boolean isHittingBlock;
     @Getter
@@ -218,7 +215,6 @@ public class BotController
                     this.currentBlock = loc;
                     this.currentItemHittingBlock = this.bot.player.getHeldItem();
                     this.curBlockDamageMP = 0.0F;
-                    this.stepSoundTickCounter = 0.0F;
                     this.bot.world.sendBlockBreakProgress(this.bot.player.getEntityId(), this.currentBlock, (int)(this.curBlockDamageMP * 10.0F) - 1);
                 }
             }
@@ -267,15 +263,12 @@ public class BotController
             {
                 this.curBlockDamageMP += block.getPlayerRelativeBlockHardness(this.bot.player, this.bot.player.worldObj, posBlock);
 
-                ++this.stepSoundTickCounter;
-
                 if (this.curBlockDamageMP >= 1.0F)
                 {
                     this.isHittingBlock = false;
                     this.netClientHandler.addToSendQueue(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.STOP_DESTROY_BLOCK, posBlock, directionFacing));
                     this.onPlayerDestroyBlock(posBlock, directionFacing);
                     this.curBlockDamageMP = 0.0F;
-                    this.stepSoundTickCounter = 0.0F;
                     this.blockHitDelay = 5;
                 }
 
@@ -431,13 +424,7 @@ public class BotController
         return new BotEntity(this.bot, worldIn, this.netClientHandler);
     }
 
-    public void attackEntity(EntityPlayer playerIn, Entity targetEntity)
-    {
-        AttackEvent event = new AttackEvent(targetEntity);
-        Juk.getInstance().eventManager.post(event);
-        if (event.isCancelled()) return;
-        targetEntity = event.target;
-
+    public void attackEntity(EntityPlayer playerIn, Entity targetEntity) {
         this.syncCurrentPlayItem();
         this.netClientHandler.addToSendQueue(new C02PacketUseEntity(targetEntity, C02PacketUseEntity.Action.ATTACK));
 

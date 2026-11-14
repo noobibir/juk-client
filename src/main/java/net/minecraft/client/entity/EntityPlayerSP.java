@@ -672,21 +672,15 @@ public class EntityPlayerSP extends AbstractClientPlayer
         this.movementInput.updatePlayerMoveState();
 
         if (this.isUsingItem() && !this.isRiding()) {
-            float moveStrafeFactor = 0.2f;
-            float moveForwardFactor = 0.2f;
-            SlowdownEvent event = new SlowdownEvent(moveStrafeFactor, moveForwardFactor, this.getItemInUse());
+            float moveStrafeFactor;
+            float moveForwardFactor;
+            SlowdownEvent event = SlowdownEvent.usingItem(this.getItemInUse().getItem());
             Juk.getInstance().eventManager.post(event);
+            moveForwardFactor = event.x;
+            moveStrafeFactor = event.y;
 
-            if (event.isCancelled()) {
-                moveForwardFactor = 1;
-                moveStrafeFactor = 1;
-            } else {
-                moveForwardFactor = event.moveForwardFactor;
-                moveStrafeFactor = event.moveStrafeFactor;
-            }
-
-            this.movementInput.moveStrafe *= moveForwardFactor;
-            this.movementInput.moveForward *= moveStrafeFactor;
+            this.movementInput.moveStrafe *= moveStrafeFactor;
+            this.movementInput.moveForward *= moveForwardFactor;
             this.sprintToggleTimer = 0;
         }
 

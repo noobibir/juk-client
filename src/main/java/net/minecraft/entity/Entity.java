@@ -12,6 +12,7 @@ import net.minecraft.block.BlockWall;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.block.state.pattern.BlockPattern;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.command.CommandResultStats;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.crash.CrashReport;
@@ -46,6 +47,8 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import wtf.jukclient.Juk;
+import wtf.jukclient.event.SlowdownEvent;
 
 public abstract class Entity implements ICommandSender
 {
@@ -440,12 +443,25 @@ public abstract class Entity implements ICommandSender
             if (this.isInWeb)
             {
                 this.isInWeb = false;
-                x *= 0.25D;
-                y *= 0.05000000074505806D;
-                z *= 0.25D;
-                this.motionX = 0.0D;
-                this.motionY = 0.0D;
-                this.motionZ = 0.0D;
+                if (this instanceof EntityPlayerSP) {
+                    SlowdownEvent event = SlowdownEvent.web();
+                    Juk.getInstance().eventManager.post(event);
+                    x *= event.x;
+                    y *= event.y;
+                    z *= event.x;
+                    if (!event.isCancelled()) {
+                        this.motionX = 0.0D;
+                        this.motionY = 0.0D;
+                        this.motionZ = 0.0D;
+                    }
+                } else {
+                    x *= 0.25D;
+                    y *= 0.05000000074505806D;
+                    z *= 0.25D;
+                    this.motionX = 0.0D;
+                    this.motionY = 0.0D;
+                    this.motionZ = 0.0D;
+                }
             }
 
             double d3 = x;
