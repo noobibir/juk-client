@@ -44,13 +44,13 @@ public class InputSetting extends Setting {
                 mc.fontRendererObj,
                 this.value + (selected ? "|" : ""),
                 x + nameSize,
-                y, JukGlobals.input_nameColor
+                y, JukGlobals.input_valueColor
         );
         RenderUtil.line(x + nameSize,
                 y + mc.fontRendererObj.FONT_HEIGHT,
                 x + nameSize + valueSize,
                 y + mc.fontRendererObj.FONT_HEIGHT,
-                JukGlobals.input_nameColor
+                JukGlobals.input_valueColor
         );
     }
 
