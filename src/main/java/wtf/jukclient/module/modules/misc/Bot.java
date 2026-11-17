@@ -49,6 +49,18 @@ public class Bot extends Module {
 
     @Subscribe
     private void onTick(TickEvent event) {
+        bot.settings.keyBindForward = mc.gameSettings.keyBindForward.isKeyDown();
+        bot.settings.keyBindBack = mc.gameSettings.keyBindBack.isKeyDown();
+        bot.settings.keyBindLeft = mc.gameSettings.keyBindLeft.isKeyDown();
+        bot.settings.keyBindRight = mc.gameSettings.keyBindRight.isKeyDown();
+        bot.settings.keyBindSprint = mc.gameSettings.keyBindSprint.isKeyDown();
+        bot.settings.keyBindJump = mc.gameSettings.keyBindJump.isKeyDown();
+        bot.settings.keyBindSneak = mc.gameSettings.keyBindSneak.isKeyDown();
+
+        if (bot.player != null) {
+            bot.player.rotationYaw = mc.thePlayer.rotationYaw;
+            bot.player.rotationPitch = mc.thePlayer.rotationPitch;
+        }
         bot.runTick();
     }
 }

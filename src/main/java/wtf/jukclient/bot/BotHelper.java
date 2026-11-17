@@ -24,7 +24,7 @@ public class BotHelper {
             return null;
         }
         bot.session = new Session(username, username, "0", "MOJANG");
-        bot.netManager = BotNetManager.createNetworkManagerAndConnect(address, port, false);
+        bot.netManager = BotNetManager.createNetworkManagerAndConnect(address, port);
         bot.netHandler = new BotNetHandlerLogin(bot.netManager, bot);
         bot.netManager.setNetHandler(bot.netHandler);
         bot.netManager.sendPacket(new C00Handshake(47, ip, port, EnumConnectionState.LOGIN));

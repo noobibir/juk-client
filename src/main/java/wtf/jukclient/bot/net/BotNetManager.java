@@ -41,6 +41,7 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.LazyLoadBase;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.Validate;
+import wtf.jukclient.bot.BotSettings;
 import wtf.jukclient.bot.net.serializer.BotDeserializer;
 import wtf.jukclient.bot.net.serializer.BotDeserializer2;
 import wtf.jukclient.bot.net.serializer.BotSerializer;
@@ -271,19 +272,17 @@ public class BotNetManager extends SimpleChannelInboundHandler<Packet> {
         return this.channel instanceof LocalChannel || this.channel instanceof LocalServerChannel;
     }
 
-    public static BotNetManager createNetworkManagerAndConnect(InetAddress address, int serverPort, boolean useNativeTransport)
+    public static BotNetManager createNetworkManagerAndConnect(InetAddress address, int serverPort)
     {
         final BotNetManager networkmanager = new BotNetManager();
         Class <? extends SocketChannel > oclass;
         LazyLoadBase <? extends EventLoopGroup > lazyloadbase;
 
-        if (Epoll.isAvailable() && useNativeTransport)
-        {
+        if (Epoll.isAvailable() && BotSettings.useNativeTransport) {
             oclass = EpollSocketChannel.class;
             lazyloadbase = CLIENT_EPOLL_EVENTLOOP;
         }
-        else
-        {
+        else {
             oclass = NioSocketChannel.class;
             lazyloadbase = CLIENT_NIO_EVENTLOOP;
         }

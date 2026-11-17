@@ -12,10 +12,9 @@ public class BotSettings {
     public boolean keyBindJump = false;
     public boolean keyBindSneak = false;
     public boolean keyBindSprint = false;
-    public boolean keyBindUseItem = false;
 
     public static float mouseSensitivity = 0.5F;
-    public static int renderDistanceChunks = -1;
+    public static int renderDistanceChunks = 1;
     public static boolean useNativeTransport = true;
     public static String language = "zh_CN"; // kitayski juk
     public EnumDifficulty difficulty;
