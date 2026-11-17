@@ -57,7 +57,7 @@ public class Bot extends Module {
         bot.settings.keyBindJump = mc.gameSettings.keyBindJump.isKeyDown();
         bot.settings.keyBindSneak = mc.gameSettings.keyBindSneak.isKeyDown();
 
-        if (bot.player != null) {
+        if (bot.player != null && mc.thePlayer != null) {
             bot.player.rotationYaw = mc.thePlayer.rotationYaw;
             bot.player.rotationPitch = mc.thePlayer.rotationPitch;
         }

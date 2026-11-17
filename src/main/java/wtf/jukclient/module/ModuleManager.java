@@ -19,8 +19,8 @@ public class ModuleManager implements Subscriber {
         Juk.getInstance().eventManager.subscribe(this);
     }
 
-    public final Module getModule(Class<? extends Module> mod) {
-        return modules.get(mod);
+    public final <T extends Module> T getModule(Class<T> mod) {
+        return (T) modules.get(mod);
     }
 
     public final void register() {

@@ -9,14 +9,12 @@ import net.minecraft.util.*;
 import wtf.jukclient.JukGlobals;
 import wtf.jukclient.event.PlayerRotEvent;
 import wtf.jukclient.event.PlayerTickEvent;
-import wtf.jukclient.event.TickEvent;
 import wtf.jukclient.module.EnumCategory;
 import wtf.jukclient.module.Module;
 import wtf.jukclient.module.setting.BoolSetting;
 import wtf.jukclient.module.setting.ChoiceSetting;
 import wtf.jukclient.module.setting.FloatSetting;
 import wtf.jukclient.module.setting.IntSetting;
-import wtf.jukclient.util.ChatUtil;
 import wtf.jukclient.util.Clicker;
 import wtf.jukclient.util.MathUtil;
 
@@ -63,6 +61,11 @@ public class KillAura extends Module {
         jitterYaw.addSettingRenderFunc(rotate::get);
         jitterPitch.addSettingRenderFunc(rotate::get);
         raycastThruBlocks.addSettingRenderFunc(checkRaycast::get);
+    }
+
+    public Entity getTarget() {
+        if (targetIndex >= targets.size()) return null;
+        return targets.get(targetIndex);
     }
 
     @Override
